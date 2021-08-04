@@ -36,7 +36,7 @@ export class UsersController {
   }
 
   @Get()
-  async allUsers(@Query('skip') skip: number, @Query('limit') limit: number) {
+  async allUsers(@Query('skip') skip: string, @Query('limit') limit: string) {
     try {
       const users = await this.usersService.getUsers(skip, limit);
 
