@@ -1,10 +1,10 @@
-import { NotFoundException, NotAcceptableException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-import { User } from '../model/user.model';
+import { User } from '../interfaces/user.interface';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +17,7 @@ export class UsersService {
       });
 
       if (ifUserExist) {
-        throw new NotAcceptableException();
+        throw new BadRequestException('The User already exists!');
       }
 
       const newUser = new this.userModel({
@@ -41,11 +41,7 @@ export class UsersService {
         email: user.email,
       };
     } catch (err) {
-      throw new NotAcceptableException({
-        statusCode: 400,
-        message: 'The user already exists!',
-        error: 'Not Acceptable',
-      });
+      throw err;
     }
   }
 
@@ -78,12 +74,12 @@ export class UsersService {
       const user = await this.userModel.findById(id);
 
       if (!user) {
-        throw new NotFoundException();
+        throw new NotFoundException('User is not found!');
       }
 
       return user;
     } catch (err) {
-      throw new NotFoundException('User is not found!');
+      throw err;
     }
   }
 
@@ -98,7 +94,7 @@ export class UsersService {
       const user = await this.userModel.findById(id);
 
       if (!user) {
-        throw new NotFoundException();
+        throw new NotFoundException('User is not found!');
       }
 
       const updatedUser = user;
@@ -118,7 +114,7 @@ export class UsersService {
 
       return updatedUser;
     } catch (err) {
-      throw new NotFoundException('User is not found!');
+      throw err;
     }
   }
 
