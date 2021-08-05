@@ -7,6 +7,7 @@ import {
   Patch,
   Delete,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 
@@ -36,7 +37,10 @@ export class UsersController {
   }
 
   @Get()
-  async allUsers(@Query('skip') skip: string, @Query('limit') limit: string) {
+  async allUsers(
+    @Query('skip', ParseIntPipe) skip: number,
+    @Query('limit', ParseIntPipe) limit: number,
+  ) {
     try {
       const users = await this.usersService.getUsers(skip, limit);
 
