@@ -45,18 +45,15 @@ export class UsersService {
     }
   }
 
-  async getUsers(skip: string, limit: string) {
+  async getUsers(skip: number, limit: number) {
     try {
-      skip = skip ? skip : '0';
-      limit = limit ? limit : '2';
+      skip = skip ? skip : 0;
+      limit = limit ? limit : 2;
 
       // console.log(typeof skip);
       // console.log(typeof limit);
 
-      const users = await this.userModel
-        .find()
-        .skip(parseInt(skip))
-        .limit(parseInt(limit));
+      const users = await this.userModel.find().skip(skip).limit(limit);
 
       return users.map((user) => ({
         id: user.id,
