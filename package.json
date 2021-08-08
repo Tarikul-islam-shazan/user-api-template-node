@@ -28,6 +28,7 @@
     "@types/mongoose": "^5.11.97",
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
+    "joi": "^17.4.2",
     "mongoose": "^5.13.5",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
