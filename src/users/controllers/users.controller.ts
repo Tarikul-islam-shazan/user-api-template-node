@@ -21,6 +21,7 @@ export class UsersController {
     @Body('lastName') last: string,
     @Body('email') email: string,
     @Body('password') password: string,
+    @Body('role') role: string,
   ) {
     try {
       const user = await this.usersService.addUser(
@@ -28,6 +29,7 @@ export class UsersController {
         last,
         email,
         password,
+        role,
       );
 
       return user;
