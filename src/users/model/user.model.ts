@@ -31,23 +31,23 @@ export const userSchema = new mongoose.Schema(
   },
 );
 
-export function validateInput(user) {
-  const schema = Joi.object({
-    firstName: Joi.string().min(2).max(50).required(),
-    lastName: Joi.string().min(5).max(50).required(),
-    email: Joi.string().email().min(5).max(255).required(),
-    password: Joi.string().min(5).max(1024).required(),
-    role: Joi.string().lowercase().valid('user', 'admin').required(),
-  });
+// export function validateInput(user) {
+//   const schema = Joi.object({
+//     firstName: Joi.string().min(2).max(50).required(),
+//     lastName: Joi.string().min(5).max(50).required(),
+//     email: Joi.string().email().min(5).max(255).required(),
+//     password: Joi.string().min(5).max(1024).required(),
+//     role: Joi.string().lowercase().valid('user', 'admin').required(),
+//   });
 
-  return schema.validate(user, { allowUnknown: true });
-}
+//   return schema.validate(user, { allowUnknown: true });
+// }
 
-export function validateLogin(user) {
-  const schema = Joi.object({
-    email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(1024).required(),
-  });
+// export function validateLogin(user) {
+//   const schema = Joi.object({
+//     email: Joi.string().min(5).max(255).required().email(),
+//     password: Joi.string().min(5).max(1024).required(),
+//   });
 
-  return schema.validate(user, { allowUnknown: true });
-}
+//   return schema.validate(user, { allowUnknown: true });
+// }
