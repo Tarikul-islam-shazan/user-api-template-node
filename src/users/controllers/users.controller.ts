@@ -8,7 +8,10 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../services/users.service';
 
 @Controller('users')
@@ -93,5 +96,25 @@ export class UsersController {
     } catch (err) {
       throw err;
     }
+  }
+
+  @Post('login')
+  async login(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
+    try {
+      const user = await this.usersService.logging(email, password);
+
+      return user;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('dashboard')
+  @UseGuards(AuthGuard())
+  currentUser(@Req() req) {
+    return req.user;
   }
 }
