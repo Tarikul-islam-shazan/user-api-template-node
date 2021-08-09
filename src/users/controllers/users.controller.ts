@@ -16,6 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
+import { UpdateUserDto } from './../dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -59,18 +60,12 @@ export class UsersController {
   @Patch(':id')
   async updateUser(
     @Param('id') userId: string,
-    @Body('firstName') first: string,
-    @Body('lastName') last: string,
-    @Body('email') email: string,
-    @Body('password') password: string,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     try {
       const updateUser = await this.usersService.updateUser(
         userId,
-        first,
-        last,
-        email,
-        password,
+        updateUserDto,
       );
 
       return updateUser;
