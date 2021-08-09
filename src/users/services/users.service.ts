@@ -10,7 +10,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '../interfaces/user.interface';
-import { validateInput, validateLogin } from '../model/user.model';
+// import { validateInput, validateLogin } from '../model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
@@ -35,8 +35,8 @@ export class UsersService {
         role,
       });
 
-      const { error } = validateInput(newUser);
-      if (error) throw new NotAcceptableException(error.message);
+      // const { error } = validateInput(newUser);
+      // if (error) throw new NotAcceptableException(error.message);
 
       const ifUserExist = await this.userModel.findOne({
         email: newUser.email,
@@ -102,13 +102,13 @@ export class UsersService {
   async updateUser(id: string, updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userModel.findById(id);
-
       if (!user) {
         throw new NotFoundException('User is not found!');
       }
 
       const { firstName, lastName, email, password } = updateUserDto;
       const updatedUser = user;
+
       if (firstName) {
         updatedUser.firstName = firstName;
       }
@@ -161,8 +161,8 @@ export class UsersService {
         password,
       });
 
-      const { error } = validateLogin(user);
-      if (error) throw new NotAcceptableException(error.message);
+      // const { error } = validateLogin(user);
+      // if (error) throw new NotAcceptableException(error.message);
 
       const validUser = await this.userModel.findOne({ email: user.email });
       if (!validUser) {
