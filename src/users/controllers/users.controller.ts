@@ -12,28 +12,19 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+
 import { UsersService } from '../services/users.service';
+import { CreateUserDto } from './../dto/create-user.dto';
+import { LoginUserDto } from './../dto/login-user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async createUser(
-    @Body('firstName') first: string,
-    @Body('lastName') last: string,
-    @Body('email') email: string,
-    @Body('password') password: string,
-    @Body('role') role: string,
-  ) {
+  async createUser(@Body() createUserDto: CreateUserDto) {
     try {
-      const user = await this.usersService.addUser(
-        first,
-        last,
-        email,
-        password,
-        role,
-      );
+      const user = await this.usersService.addUser(createUserDto);
 
       return user;
     } catch (err) {
@@ -99,12 +90,9 @@ export class UsersController {
   }
 
   @Post('login')
-  async login(
-    @Body('email') email: string,
-    @Body('password') password: string,
-  ) {
+  async login(@Body() loginUserDto: LoginUserDto) {
     try {
-      const user = await this.usersService.logging(email, password);
+      const user = await this.usersService.logging(loginUserDto);
 
       return user;
     } catch (err) {

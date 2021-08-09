@@ -12,6 +12,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../interfaces/user.interface';
 import { validateInput, validateLogin } from '../model/user.model';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from './../dto/create-user.dto';
+import { LoginUserDto } from './../dto/login-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,17 +22,13 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  async addUser(
-    first: string,
-    last: string,
-    email: string,
-    password: string,
-    role: string,
-  ) {
+  async addUser(createUserDto: CreateUserDto) {
     try {
+      const { firstName, lastName, email, password, role } = createUserDto;
+
       const newUser = new this.userModel({
-        firstName: first,
-        lastName: last,
+        firstName,
+        lastName,
         email,
         password,
         role,
@@ -150,8 +148,10 @@ export class UsersService {
     }
   }
 
-  async logging(email: string, password: string) {
+  async logging(loginUserDto: LoginUserDto) {
     try {
+      const { email, password } = loginUserDto;
+
       const user = new this.userModel({
         email,
         password,
