@@ -14,6 +14,7 @@ import { validateInput, validateLogin } from '../model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
+import { UpdateUserDto } from './../dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -98,13 +99,7 @@ export class UsersService {
     }
   }
 
-  async updateUser(
-    id: string,
-    first: string,
-    last: string,
-    email: string,
-    password: string,
-  ) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userModel.findById(id);
 
@@ -112,22 +107,31 @@ export class UsersService {
         throw new NotFoundException('User is not found!');
       }
 
+      const { firstName, lastName, email, password } = updateUserDto;
       const updatedUser = user;
-      if (first) {
-        updatedUser.firstName = first;
+      if (firstName) {
+        updatedUser.firstName = firstName;
       }
-      if (last) {
-        updatedUser.lastName = last;
+      if (lastName) {
+        updatedUser.lastName = lastName;
       }
       if (email) {
         updatedUser.email = email;
       }
       if (password) {
-        updatedUser.password = password;
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(updatedUser.password, salt);
+
+        updatedUser.password = hashedPassword;
       }
       updatedUser.save();
 
-      return updatedUser;
+      return {
+        id: updatedUser._id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+      };
     } catch (err) {
       throw err;
     }
