@@ -6,5 +6,10 @@ export interface User extends mongoose.Document {
   lastName: string;
   email: string;
   password: string;
-  role: string;
+  role: RoleBase;
+}
+
+export enum RoleBase {
+  user = 'user',
+  admin = 'admin',
 }
