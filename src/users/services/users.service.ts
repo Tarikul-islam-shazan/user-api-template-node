@@ -2,6 +2,7 @@ import {
   NotFoundException,
   BadRequestException,
   NotAcceptableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,11 +10,15 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '../interfaces/user.interface';
-import { validateInput } from '../model/user.model';
+import { validateInput, validateLogin } from '../model/user.model';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private readonly userModel: Model<User>,
+    private jwtService: JwtService,
+  ) {}
 
   async addUser(
     first: string,
@@ -140,6 +145,38 @@ export class UsersService {
       }
 
       return user;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async logging(email: string, password: string) {
+    try {
+      const user = new this.userModel({
+        email,
+        password,
+      });
+
+      const { error } = validateLogin(user);
+      if (error) throw new NotAcceptableException(error.message);
+
+      const validUser = await this.userModel.findOne({ email: user.email });
+      if (!validUser) {
+        throw new UnauthorizedException('Invalid email or password!!');
+      }
+
+      const validPassword = await bcrypt.compare(
+        user.password,
+        validUser.password,
+      );
+      if (!validPassword) {
+        throw new UnauthorizedException('Invalid email or password!!');
+      }
+
+      const payLoad = { id: user._id, role: validUser.role };
+      const accessToken = await this.jwtService.sign(payLoad);
+
+      return { accessToken };
     } catch (err) {
       throw err;
     }
