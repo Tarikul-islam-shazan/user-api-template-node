@@ -134,6 +134,9 @@ export class UsersRepository extends Repository<User> {
       // console.log(typeof skip);
       // console.log(typeof limit);
 
+      //   const query = this.createQueryBuilder('user').limit(limit).skip(skip);
+      //   const users = await query.getMany();
+
       const users = await this.find();
 
       return users.map((user) => ({
