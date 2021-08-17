@@ -6,6 +6,7 @@ import {
   Length,
   IsLowercase,
   IsEnum,
+  Matches,
 } from 'class-validator';
 import { RoleBase } from '../interfaces/user-role.enum';
 
@@ -26,9 +27,12 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @Length(5, 1024)
   @IsNotEmpty()
   @IsString()
+  @Length(8, 32)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'Password is too weak!',
+  })
   password: string;
 
   @IsString()
