@@ -23,81 +23,44 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    try {
-      const user = await this.usersService.addUser(createUserDto);
-
-      return user;
-    } catch (err) {
-      throw err;
-    }
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.addUser(createUserDto);
   }
 
   @Get()
-  async allUsers(
+  allUsers(
     @Query('skip', ParseIntPipe) skip: number,
     @Query('limit', ParseIntPipe) limit: number,
-  ) {
-    try {
-      const users = await this.usersService.getUsers(skip, limit);
-
-      return users;
-    } catch (err) {
-      throw err;
-    }
+  ): Promise<Object> {
+    return this.usersService.getUsers(skip, limit);
   }
 
   @Get(':id')
-  async singleUser(@Param('id') userId: string) {
-    try {
-      const user = await this.usersService.getSingleUser(userId);
-      return user;
-    } catch (err) {
-      throw err;
-    }
+  singleUser(@Param('id') userId: string): Promise<Object> {
+    return this.usersService.getSingleUser(userId);
   }
 
   @Patch(':id')
-  async updateUser(
+  updateUser(
     @Param('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
-    try {
-      const updateUser = await this.usersService.updateUser(
-        userId,
-        updateUserDto,
-      );
-
-      return updateUser;
-    } catch (err) {
-      throw err;
-    }
+  ): Promise<Object> {
+    return this.usersService.updateUser(userId, updateUserDto);
   }
 
   @Delete(':id')
-  async userDelete(@Param('id') userId: string) {
-    try {
-      const user = await this.usersService.deleteUser(userId);
-      return { message: 'The user is deleted', id: user.id };
-    } catch (err) {
-      throw err;
-    }
+  userDelete(@Param('id') userId: string): Promise<string> {
+    return this.usersService.deleteUser(userId);
   }
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
-    try {
-      const user = await this.usersService.logging(loginUserDto);
-
-      return user;
-    } catch (err) {
-      throw err;
-    }
+  login(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+    return this.usersService.login(loginUserDto);
   }
 
-  @Post('dashboard')
-  @UseGuards(AuthGuard())
-  currentUser(@Req() req) {
-    return req.user;
-  }
+  // @Post('dashboard')
+  // @UseGuards(AuthGuard())
+  // currentUser(@Req() req) {
+  //   return req.user;
+  // }
 }

@@ -9,175 +9,63 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-import { User } from '../interfaces/user.interface';
+// import { User } from '../interfaces/user-role.enum';
 // import { validateInput, validateLogin } from '../model/user.model';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UsersRepository } from '../repositories/users.repository';
+import { User } from './../entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel('User') private readonly userModel: Model<User>,
+    // @InjectModel('User') private readonly userModel: Model<User>,
+    @InjectRepository(UsersRepository)
+    private usersRepository: UsersRepository,
     private jwtService: JwtService,
   ) {}
 
-  async addUser(createUserDto: CreateUserDto) {
-    try {
-      const { firstName, lastName, email, password, role } = createUserDto;
-
-      const newUser = new this.userModel({
-        firstName,
-        lastName,
-        email,
-        password,
-        role,
-      });
-
-      // const { error } = validateInput(newUser);
-      // if (error) throw new NotAcceptableException(error.message);
-
-      const ifUserExist = await this.userModel.findOne({
-        email: newUser.email,
-      });
-
-      if (ifUserExist) {
-        throw new BadRequestException('The User already exists!');
-      }
-
-      const salt = await bcrypt.genSalt(12);
-      const hashedPassword = await bcrypt.hash(newUser.password, salt);
-
-      newUser.password = hashedPassword;
-
-      const user = await newUser.save();
-
-      return {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      };
-    } catch (err) {
-      throw err;
-    }
+  addUser(createUserDto: CreateUserDto): Promise<Object> {
+    return this.usersRepository.addUser(createUserDto);
   }
 
-  async getUsers(skip: number, limit: number) {
-    try {
-      skip = skip ? skip : 0;
-      limit = limit ? limit : 2;
-
-      // console.log(typeof skip);
-      // console.log(typeof limit);
-
-      const users = await this.userModel.find().skip(skip).limit(limit);
-
-      return users.map((user) => ({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      }));
-    } catch (err) {
-      throw err;
-    }
+  async getUsers(skip: number, limit: number): Promise<Object> {
+    return this.usersRepository.getUsers(skip, limit);
   }
 
-  async getSingleUser(id: string) {
-    try {
-      const user = await this.userModel.findById(id);
-
-      if (!user) {
-        throw new NotFoundException('User is not found!');
-      }
-
-      return user;
-    } catch (err) {
-      throw err;
-    }
+  getSingleUser(userId: string): Promise<Object> {
+    return this.usersRepository.getSingleUser(userId);
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto) {
-    try {
-      const user = await this.userModel.findById(id);
-      if (!user) {
-        throw new NotFoundException('User is not found!');
-      }
-
-      const { firstName, lastName, email, password } = updateUserDto;
-      const updatedUser = user;
-
-      if (firstName) {
-        updatedUser.firstName = firstName;
-      }
-      if (lastName) {
-        updatedUser.lastName = lastName;
-      }
-      if (email) {
-        updatedUser.email = email;
-      }
-      if (password) {
-        const salt = await bcrypt.genSalt(12);
-        const hashedPassword = await bcrypt.hash(updatedUser.password, salt);
-
-        updatedUser.password = hashedPassword;
-      }
-      updatedUser.save();
-
-      return {
-        id: updatedUser._id,
-        firstName: updatedUser.firstName,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
-      };
-    } catch (err) {
-      throw err;
-    }
+  updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<Object> {
+    return this.usersRepository.updateUser(userId, updateUserDto);
   }
 
-  async deleteUser(id: string) {
-    try {
-      const user = await this.userModel.findById(id);
-      const result = await this.userModel.deleteOne({ _id: id });
-
-      if (result.n === 0) {
-        throw new NotFoundException('The user does not exist!');
-      }
-
-      return user;
-    } catch (err) {
-      throw err;
-    }
+  deleteUser(userId: string): Promise<string> {
+    return this.usersRepository.deleteUser(userId);
   }
 
-  async logging(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     try {
       const { email, password } = loginUserDto;
-
-      const user = new this.userModel({
-        email,
-        password,
-      });
 
       // const { error } = validateLogin(user);
       // if (error) throw new NotAcceptableException(error.message);
 
-      const validUser = await this.userModel.findOne({ email: user.email });
+      const validUser = await this.usersRepository.findOne({ email });
       if (!validUser) {
         throw new UnauthorizedException('Invalid email or password!!');
       }
 
-      const validPassword = await bcrypt.compare(
-        user.password,
-        validUser.password,
-      );
+      const validPassword = await bcrypt.compare(password, validUser.password);
       if (!validPassword) {
         throw new UnauthorizedException('Invalid email or password!!');
       }
 
-      const payLoad = { id: user._id, role: validUser.role };
+      const payLoad = { id: validUser.id, role: validUser.role };
       const accessToken = await this.jwtService.sign(payLoad);
 
       return { accessToken };
