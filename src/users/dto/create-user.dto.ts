@@ -7,7 +7,7 @@ import {
   IsLowercase,
   IsEnum,
 } from 'class-validator';
-import { RoleBase } from '../interfaces/user.interface';
+import { RoleBase } from '../interfaces/user-role.enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
