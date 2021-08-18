@@ -12,6 +12,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { GetUser } from '../decorator/get-user.decorator';
 
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';
@@ -28,6 +30,8 @@ export class UsersController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   allUsers(
     @Query('skip', ParseIntPipe) skip: number,
     @Query('limit', ParseIntPipe) limit: number,
@@ -36,11 +40,15 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   singleUser(@Param('id') userId: string): Promise<Object> {
     return this.usersService.getSingleUser(userId);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   updateUser(
     @Param('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -49,6 +57,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard())
   userDelete(@Param('id') userId: string): Promise<string> {
     return this.usersService.deleteUser(userId);
   }
@@ -61,6 +71,6 @@ export class UsersController {
   // @Post('dashboard')
   // @UseGuards(AuthGuard())
   // currentUser(@Req() req) {
-  //   return req.user;
+  //   console.log(req.user);
   // }
 }
