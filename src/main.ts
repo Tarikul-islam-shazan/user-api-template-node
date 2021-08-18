@@ -1,7 +1,12 @@
 require('dotenv').config();
 
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import {
+  DocumentBuilder,
+  SwaggerDocumentOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,9 +16,25 @@ async function bootstrap() {
 
     app.useGlobalPipes(new ValidationPipe());
 
+    const config = new DocumentBuilder()
+      .setTitle('Users Management')
+      .setDescription('The Users API description')
+      .setVersion('1.0')
+      .addTag('users')
+      .addBearerAuth()
+      .build();
+
+    const options: SwaggerDocumentOptions = {
+      operationIdFactory: (controllerKey: string, methodKey: string) =>
+        methodKey,
+    };
+    const document = SwaggerModule.createDocument(app, config, options);
+    SwaggerModule.setup('api', app, document);
+
     await app.listen(port);
 
-    console.log(`The server is running on Port: ${process.env.PORT}`);
+    const logger = new Logger();
+    logger.log(`The server is running on Port: ${process.env.PORT}`);
   } catch (err) {
     throw err;
   }
