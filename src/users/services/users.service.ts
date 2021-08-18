@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotAcceptableException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,9 +19,12 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
+import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UsersService {
+  logger = new Logger('UsersService');
+
   constructor(
     // @InjectModel('User') private readonly userModel: Model<User>,
     @InjectRepository(UsersRepository)
@@ -65,11 +69,14 @@ export class UsersService {
         throw new UnauthorizedException('Invalid email or password!!');
       }
 
-      const payLoad = { id: validUser.id, role: validUser.role };
+      const payLoad: JwtPayload = { id: validUser.id, role: validUser.role };
       const accessToken = await this.jwtService.sign(payLoad);
+
+      this.logger.verbose(`Logged in successfully! Token: ${accessToken}`);
 
       return { accessToken };
     } catch (err) {
+      this.logger.error('User is not valid!', err.stack);
       throw err;
     }
   }

@@ -1,12 +1,15 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { error } from 'console';
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
+  logger = new Logger('UsersRepository');
+
   async addUser(createUserDto: CreateUserDto): Promise<Object> {
     try {
       const { firstName, lastName, email, password, role } = createUserDto;
@@ -37,13 +40,19 @@ export class UsersRepository extends Repository<User> {
 
       const user = await this.save(newUser);
 
-      return {
+      const result = {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role,
       };
+
+      this.logger.verbose(`A new user is created! Data: ${result}`);
+
+      return result;
     } catch (err) {
+      this.logger.error(`The User already exists!`, err.stack);
       throw err;
     }
   }
@@ -64,8 +73,11 @@ export class UsersRepository extends Repository<User> {
         role: user.role,
       };
 
+      this.logger.verbose(`User is found! Data: ${result}`);
+
       return result;
     } catch (err) {
+      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
       throw err;
     }
   }
@@ -100,13 +112,20 @@ export class UsersRepository extends Repository<User> {
       }
       this.save(updatedUser);
 
-      return {
+      const result = {
         id: updatedUser.id,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         email: updatedUser.email,
       };
+
+      this.logger.verbose(
+        `The user with ID ${userId} is updated! Data: ${result}`,
+      );
+
+      return result;
     } catch (err) {
+      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
       throw err;
     }
   }
@@ -120,13 +139,16 @@ export class UsersRepository extends Repository<User> {
         throw new NotFoundException('The user does not exist!');
       }
 
+      this.logger.log(`The task with ID ${userId} is deleted!`);
+
       return `The task with ID ${userId} is deleted!`;
     } catch (err) {
+      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
       throw err;
     }
   }
 
-  async getUsers(skip: number, limit: number): Promise<Object> {
+  async getUsers(skip: number, limit: number): Promise<Object | string> {
     try {
       skip = skip ? skip : 0;
       limit = limit ? limit : 2;
@@ -139,13 +161,22 @@ export class UsersRepository extends Repository<User> {
 
       const users = await this.find();
 
+      if (users.length === 0) {
+        this.logger.log('No data to show!!');
+        return 'There are no users to show!';
+      }
+
+      this.logger.verbose(`User's list is loaded! Data: ${users}`);
+
       return users.map((user) => ({
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role,
       }));
     } catch (err) {
+      this.logger.error(`Failed to load the users list`, err.stack);
       throw err;
     }
   }
