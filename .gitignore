@@ -1,4 +1,3 @@
-# environment setup
 .env-stage-dev
 .env-stage-prod
 
