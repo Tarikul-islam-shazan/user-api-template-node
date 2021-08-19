@@ -1,16 +1,21 @@
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
-import { error } from 'console';
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
   logger = new Logger('UsersRepository');
 
-  async addUser(createUserDto: CreateUserDto): Promise<Object> {
+  async createUser(createUserDto: CreateUserDto): Promise<Object> {
     try {
       const { firstName, lastName, email, password, role } = createUserDto;
 
@@ -22,14 +27,11 @@ export class UsersRepository extends Repository<User> {
         role,
       });
 
-      // const { error } = validateInput(newUser);
-      // if (error) throw new NotAcceptableException(error.message);
-
-      const ifUserExist = await this.findOne({
+      const ifUserExists = await this.findOne({
         email: newUser.email,
       });
 
-      if (ifUserExist) {
+      if (ifUserExists) {
         throw new BadRequestException('The User already exists!');
       }
 
@@ -38,34 +40,43 @@ export class UsersRepository extends Repository<User> {
 
       newUser.password = hashedPassword;
 
-      const user = await this.save(newUser);
+      await this.save(newUser);
 
-      const result = {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
+      const newValidUser = {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
       };
 
-      this.logger.verbose(`A new user is created! Data: ${result}`);
+      this.logger.verbose(
+        `A new user is created! Data: ${JSON.stringify(newValidUser)}`,
+      );
 
-      return result;
+      return newValidUser;
     } catch (err) {
       this.logger.error(`The User already exists!`, err.stack);
       throw err;
     }
   }
 
-  async getSingleUser(userId: string): Promise<Object> {
+  async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
     try {
+      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
+
+      if (requestingUser.role !== 'admin') {
+        // console.log(`The requested user role is ${requestingUser.role}`);
+        throw new ForbiddenException('The user is not allowed to access!');
+      }
+
       const user = await this.findOne(userId);
 
       if (!user) {
         throw new NotFoundException('User is not found!');
       }
 
-      const result = {
+      const userInfo = {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -73,11 +84,14 @@ export class UsersRepository extends Repository<User> {
         role: user.role,
       };
 
-      this.logger.verbose(`User is found! Data: ${result}`);
+      this.logger.verbose(`User is found! Data: ${JSON.stringify(userInfo)}`);
 
-      return result;
+      return userInfo;
     } catch (err) {
-      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
+      this.logger.error(
+        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        err.stack,
+      );
       throw err;
     }
   }
@@ -85,8 +99,16 @@ export class UsersRepository extends Repository<User> {
   async updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
+    requestingUser: User,
   ): Promise<Object> {
     try {
+      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
+
+      if (requestingUser.role !== 'admin') {
+        // console.log(`The requested user role is ${requestingUser.role}`);
+        throw new ForbiddenException('The user is not allowed to access!');
+      }
+
       const user = await this.findOne(userId);
       if (!user) {
         throw new NotFoundException('User is not found!');
@@ -112,7 +134,7 @@ export class UsersRepository extends Repository<User> {
       }
       this.save(updatedUser);
 
-      const result = {
+      const updatedUserInfo = {
         id: updatedUser.id,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
@@ -120,35 +142,53 @@ export class UsersRepository extends Repository<User> {
       };
 
       this.logger.verbose(
-        `The user with ID ${userId} is updated! Data: ${result}`,
+        `The user with ID ${userId} is updated! Data: ${JSON.stringify(
+          updatedUserInfo,
+        )}`,
       );
 
-      return result;
+      return updatedUserInfo;
     } catch (err) {
-      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
+      this.logger.error(
+        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        err.stack,
+      );
       throw err;
     }
   }
 
-  async deleteUser(userId: string): Promise<string> {
+  async deleteUser(userId: string, requestingUser: User): Promise<string> {
     try {
-      const user = await this.findOne(userId);
+      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
+
+      if (requestingUser.role !== 'admin') {
+        // console.log(`The requested user role is ${requestingUser.role}`);
+        throw new ForbiddenException('The user is not allowed to access!');
+      }
+
       const result = await this.delete(userId);
 
       if (result.affected === 0) {
         throw new NotFoundException('The user does not exist!');
       }
 
-      this.logger.log(`The task with ID ${userId} is deleted!`);
+      this.logger.log(`The task with ID ${JSON.stringify(userId)} is deleted!`);
 
       return `The task with ID ${userId} is deleted!`;
     } catch (err) {
-      this.logger.error(`The user with ID ${userId} is not found!`, err.stack);
+      this.logger.error(
+        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        err.stack,
+      );
       throw err;
     }
   }
 
-  async getUsers(skip: number, limit: number): Promise<Object | string> {
+  async getUsers(
+    skip: number,
+    limit: number,
+    requestingUser: User,
+  ): Promise<Object | string> {
     try {
       skip = skip ? skip : 0;
       limit = limit ? limit : 2;
@@ -156,19 +196,28 @@ export class UsersRepository extends Repository<User> {
       // console.log(typeof skip);
       // console.log(typeof limit);
 
-      //   const query = this.createQueryBuilder('user').limit(limit).skip(skip);
-      //   const users = await query.getMany();
+      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
 
-      const users = await this.find();
+      if (requestingUser.role !== 'admin') {
+        // console.log(`The requested user role is ${requestingUser.role}`);
+        throw new ForbiddenException('The user is not allowed to access!');
+      }
 
-      if (users.length === 0) {
+      const usersList = await this.find({
+        skip: skip,
+        take: limit,
+      });
+
+      if (usersList.length === 0) {
         this.logger.log('No data to show!!');
         return 'There are no users to show!';
       }
 
-      this.logger.verbose(`User's list is loaded! Data: ${users}`);
+      this.logger.verbose(
+        `User's list is loaded! Data: ${JSON.stringify(usersList)}`,
+      );
 
-      return users.map((user) => ({
+      return usersList.map((user) => ({
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,

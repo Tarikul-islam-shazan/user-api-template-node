@@ -1,22 +1,12 @@
-import {
-  NotFoundException,
-  BadRequestException,
-  NotAcceptableException,
-  UnauthorizedException,
-  Logger,
-} from '@nestjs/common';
+import { UnauthorizedException, Logger } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-
-// import { User } from '../interfaces/user-role.enum';
-// import { validateInput, validateLogin } from '../model/user.model';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
@@ -26,53 +16,69 @@ export class UsersService {
   logger = new Logger('UsersService');
 
   constructor(
-    // @InjectModel('User') private readonly userModel: Model<User>,
     @InjectRepository(UsersRepository)
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
   ) {}
 
-  addUser(createUserDto: CreateUserDto): Promise<Object> {
-    return this.usersRepository.addUser(createUserDto);
+  createUser(createUserDto: CreateUserDto): Promise<Object> {
+    return this.usersRepository.createUser(createUserDto);
   }
 
-  async getUsers(skip: number, limit: number): Promise<Object> {
-    return this.usersRepository.getUsers(skip, limit);
+  async getUsers(
+    skip: number,
+    limit: number,
+    requestingUser: User,
+  ): Promise<Object | string> {
+    return this.usersRepository.getUsers(skip, limit, requestingUser);
   }
 
-  getSingleUser(userId: string): Promise<Object> {
-    return this.usersRepository.getSingleUser(userId);
+  getSingleUser(userId: string, requestingUser: User): Promise<Object> {
+    return this.usersRepository.getSingleUser(userId, requestingUser);
   }
 
-  updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<Object> {
-    return this.usersRepository.updateUser(userId, updateUserDto);
+  updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    requestingUser: User,
+  ): Promise<Object> {
+    return this.usersRepository.updateUser(
+      userId,
+      updateUserDto,
+      requestingUser,
+    );
   }
 
-  deleteUser(userId: string): Promise<string> {
-    return this.usersRepository.deleteUser(userId);
+  deleteUser(userId: string, requestingUser: User): Promise<string> {
+    return this.usersRepository.deleteUser(userId, requestingUser);
   }
 
   async login(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     try {
       const { email, password } = loginUserDto;
 
-      // const { error } = validateLogin(user);
-      // if (error) throw new NotAcceptableException(error.message);
-
-      const validUser = await this.usersRepository.findOne({ email });
-      if (!validUser) {
+      const isEmailValid = await this.usersRepository.findOne({ email });
+      if (!isEmailValid) {
         throw new UnauthorizedException('Invalid email or password!!');
       }
 
-      const validPassword = await bcrypt.compare(password, validUser.password);
-      if (!validPassword) {
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        isEmailValid.password,
+      );
+      if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid email or password!!');
       }
 
-      const payLoad: JwtPayload = { id: validUser.id, role: validUser.role };
+      const payLoad: JwtPayload = {
+        id: isEmailValid.id,
+        role: isEmailValid.role,
+      };
       const accessToken = await this.jwtService.sign(payLoad);
 
-      this.logger.verbose(`Logged in successfully! Token: ${accessToken}`);
+      this.logger.verbose(
+        `Logged in successfully! Token: ${JSON.stringify(accessToken)}`,
+      );
 
       return { accessToken };
     } catch (err) {
