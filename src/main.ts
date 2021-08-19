@@ -1,18 +1,22 @@
 require('dotenv').config();
 
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   DocumentBuilder,
   SwaggerDocumentOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
     const app = await NestFactory.create(AppModule);
-    const port = process.env.PORT;
+    const configService = new ConfigService();
+    const port = configService.get('APP_PORT');
+    const logger = new Logger();
 
     app.useGlobalPipes(new ValidationPipe());
 
@@ -25,7 +29,7 @@ async function bootstrap() {
       .build();
 
     const options: SwaggerDocumentOptions = {
-      operationIdFactory: (controllerKey: string, methodKey: string) =>
+      operationIdFactory: (_controllerKey: string, methodKey: string) =>
         methodKey,
     };
     const document = SwaggerModule.createDocument(app, config, options);
@@ -33,8 +37,7 @@ async function bootstrap() {
 
     await app.listen(port);
 
-    const logger = new Logger();
-    logger.log(`The server is running on Port: ${process.env.PORT}`);
+    logger.log(`The server is running on Port: ${port}`);
   } catch (err) {
     throw err;
   }
