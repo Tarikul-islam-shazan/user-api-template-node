@@ -1,34 +1,29 @@
-require('dotenv').config();
-
 import { Module } from '@nestjs/common';
-// import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { configValidationSchema } from './config.schema';
 import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: [`.env.stage.${process.env.STAGE}`],
+      validationSchema: configValidationSchema,
+    }),
     UsersModule,
-    // MongooseModule.forRoot(
-    //   `mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`,
-    //   {
-    //     useNewUrlParser: true,
-    //     useUnifiedTopology: true,
-    //     autoIndex: false,
-    //   },
-    // ),
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      host: 'localhost',
-      port: 27017,
-      database: 'user-management',
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'mongodb',
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        database: configService.get('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
