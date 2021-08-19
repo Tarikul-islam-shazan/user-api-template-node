@@ -11,10 +11,11 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { GetUser } from '../decorator/get-user.decorator';
 
+import { GetUser } from '../decorators/get-user.decorator';
+import { User } from '../entities/user.entity';
+import { JwtGuard } from '../guards/jwt.guard';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
@@ -26,41 +27,49 @@ export class UsersController {
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.addUser(createUserDto);
+    return this.usersService.createUser(createUserDto);
   }
 
   @Get()
   @ApiBearerAuth()
-  @UseGuards(AuthGuard())
-  allUsers(
+  @UseGuards(JwtGuard)
+  getUsers(
     @Query('skip', ParseIntPipe) skip: number,
     @Query('limit', ParseIntPipe) limit: number,
-  ): Promise<Object> {
-    return this.usersService.getUsers(skip, limit);
+    @GetUser() requestingUser: User,
+  ): Promise<Object | string> {
+    return this.usersService.getUsers(skip, limit, requestingUser);
   }
 
   @Get(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard())
-  singleUser(@Param('id') userId: string): Promise<Object> {
-    return this.usersService.getSingleUser(userId);
+  @UseGuards(JwtGuard)
+  getSingleUser(
+    @Param('id') userId: string,
+    @GetUser() requestingUser: User,
+  ): Promise<Object> {
+    return this.usersService.getSingleUser(userId, requestingUser);
   }
 
   @Patch(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard())
+  @UseGuards(JwtGuard)
   updateUser(
     @Param('id') userId: string,
     @Body() updateUserDto: UpdateUserDto,
+    @GetUser() requestingUser: User,
   ): Promise<Object> {
-    return this.usersService.updateUser(userId, updateUserDto);
+    return this.usersService.updateUser(userId, updateUserDto, requestingUser);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard())
-  userDelete(@Param('id') userId: string): Promise<string> {
-    return this.usersService.deleteUser(userId);
+  @UseGuards(JwtGuard)
+  deleteUser(
+    @Param('id') userId: string,
+    @GetUser() requestingUser: User,
+  ): Promise<string> {
+    return this.usersService.deleteUser(userId, requestingUser);
   }
 
   @Post('login')
@@ -68,9 +77,10 @@ export class UsersController {
     return this.usersService.login(loginUserDto);
   }
 
-  // @Post('dashboard')
-  // @UseGuards(AuthGuard())
-  // currentUser(@Req() req) {
-  //   console.log(req.user);
-  // }
+  @Post('dashboard')
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
+  currentUser(@Req() req) {
+    return req.user;
+  }
 }
