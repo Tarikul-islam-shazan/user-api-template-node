@@ -37,9 +37,15 @@ async function bootstrap() {
 
     await app.listen(port);
 
-    logger.log(`The server is running on Port: ${port}`);
+    logger.log(
+      `"L:40", "/src/main.ts", The server is running on Port: ${port}`,
+    );
   } catch (err) {
-    throw err;
+    this.logger.error(
+      `"L:42", "/src/main.ts", The server could not be loaded!`,
+      err.stack,
+    );
+    throw new Error('Internal Server Error');
   }
 }
 
