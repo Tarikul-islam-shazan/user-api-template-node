@@ -1,6 +1,6 @@
-.env-stage-dev
-.env-stage-prod
-
+# env file
+.env.stage.dev
+.env.stage.prod
 
 # compiled output
 /dist
