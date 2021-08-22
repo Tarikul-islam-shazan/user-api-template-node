@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -51,13 +52,18 @@ export class UsersRepository extends Repository<User> {
       };
 
       this.logger.verbose(
-        `A new user is created! Data: ${JSON.stringify(newValidUser)}`,
+        `"L:54", "src/users/repositories/users.repository.ts", A new user is created! Data: ${JSON.stringify(
+          newValidUser,
+        )}`,
       );
 
       return newValidUser;
     } catch (err) {
-      this.logger.error(`The User already exists!`, err.stack);
-      throw err;
+      this.logger.error(
+        `"L:62", "src/users/repositories/users.repository.ts", The User already exists!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
     }
   }
 
@@ -84,15 +90,21 @@ export class UsersRepository extends Repository<User> {
         role: user.role,
       };
 
-      this.logger.verbose(`User is found! Data: ${JSON.stringify(userInfo)}`);
+      this.logger.verbose(
+        `"L:93", "src/users/repositories/users.repository.ts", User is found! Data: ${JSON.stringify(
+          userInfo,
+        )}`,
+      );
 
       return userInfo;
     } catch (err) {
       this.logger.error(
-        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
         err.stack,
       );
-      throw err;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -142,7 +154,7 @@ export class UsersRepository extends Repository<User> {
       };
 
       this.logger.verbose(
-        `The user with ID ${userId} is updated! Data: ${JSON.stringify(
+        `"L:156", "src/users/repositories/users.repository.ts", The user with ID ${userId} is updated! Data: ${JSON.stringify(
           updatedUserInfo,
         )}`,
       );
@@ -150,10 +162,12 @@ export class UsersRepository extends Repository<User> {
       return updatedUserInfo;
     } catch (err) {
       this.logger.error(
-        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
         err.stack,
       );
-      throw err;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -172,15 +186,21 @@ export class UsersRepository extends Repository<User> {
         throw new NotFoundException('The user does not exist!');
       }
 
-      this.logger.log(`The task with ID ${JSON.stringify(userId)} is deleted!`);
+      this.logger.log(
+        `"L:189", "src/users/repositories/users.repository.ts", The task with ID ${JSON.stringify(
+          userId,
+        )} is deleted!`,
+      );
 
       return `The task with ID ${userId} is deleted!`;
     } catch (err) {
       this.logger.error(
-        `The user with ID ${JSON.stringify(userId)} is not found!`,
+        `"L:197", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
         err.stack,
       );
-      throw err;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -209,12 +229,16 @@ export class UsersRepository extends Repository<User> {
       });
 
       if (usersList.length === 0) {
-        this.logger.log('No data to show!!');
+        this.logger.log(
+          `"L:232", "src/users/repositories/users.repository.ts", No data to show!`,
+        );
         return 'There are no users to show!';
       }
 
       this.logger.verbose(
-        `User's list is loaded! Data: ${JSON.stringify(usersList)}`,
+        `"L:238", "src/users/repositories/users.repository.ts", User's list is loaded! Data: ${JSON.stringify(
+          usersList,
+        )}`,
       );
 
       return usersList.map((user) => ({
@@ -225,8 +249,11 @@ export class UsersRepository extends Repository<User> {
         role: user.role,
       }));
     } catch (err) {
-      this.logger.error(`Failed to load the users list`, err.stack);
-      throw err;
+      this.logger.error(
+        `"L:252", "src/users/repositories/users.repository.ts", Failed to load the users list`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
     }
   }
 }
