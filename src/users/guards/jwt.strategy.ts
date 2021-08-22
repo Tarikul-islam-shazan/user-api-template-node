@@ -34,13 +34,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
       const extractedUser = { id: id, role: role };
 
-      this.logger.verbose(
-        `The extracted user information: ${JSON.stringify(extractedUser)}`,
-      );
+      // this.logger.verbose(
+      //   `The extracted user information: ${JSON.stringify(extractedUser)}`,
+      // );
 
       return extractedUser;
     } catch (err) {
-      this.logger.error('Unauthorized user security breach!', err.stack);
+      this.logger.error(
+        `"L:43", "src/users/guards/jwt.strategy.ts", Unauthorized user security breach!`,
+        err.stack,
+      );
       throw err;
     }
   }
