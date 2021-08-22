@@ -1,4 +1,9 @@
-import { UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  Logger,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -59,7 +64,7 @@ export class UsersService {
 
       const isEmailValid = await this.usersRepository.findOne({ email });
       if (!isEmailValid) {
-        throw new UnauthorizedException('Invalid email or password!!');
+        throw new UnauthorizedException('Invalid email or password!');
       }
 
       const isPasswordValid = await bcrypt.compare(
@@ -67,7 +72,7 @@ export class UsersService {
         isEmailValid.password,
       );
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid email or password!!');
+        throw new UnauthorizedException('Invalid email or password!');
       }
 
       const payLoad: JwtPayload = {
@@ -77,13 +82,48 @@ export class UsersService {
       const accessToken = await this.jwtService.sign(payLoad);
 
       this.logger.verbose(
-        `Logged in successfully! Token: ${JSON.stringify(accessToken)}`,
+        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+          accessToken,
+        )}`,
       );
 
       return { accessToken };
     } catch (err) {
-      this.logger.error('User is not valid!', err.stack);
-      throw err;
+      this.logger.error(
+        `"L:92", "src/users/services/users.service.ts", User is not valid!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  dashboard(userInfo: User) {
+    try {
+      if (!userInfo) {
+        throw new NotFoundException('User data is not found!');
+      }
+
+      const currentUser = {
+        id: userInfo.id,
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        email: userInfo.email,
+        role: userInfo.role,
+      };
+
+      this.logger.verbose(
+        `"L:114", "src/users/services/users.service.ts", Dashboard data loaded. Data: ${JSON.stringify(
+          currentUser,
+        )}`,
+      );
+
+      return currentUser;
+    } catch (err) {
+      this.logger.error(
+        `"L:122", "src/users/services/users.service.ts", User data could not be loaded!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
     }
   }
 }
