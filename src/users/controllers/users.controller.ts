@@ -9,7 +9,6 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
@@ -80,7 +79,7 @@ export class UsersController {
   @Post('dashboard')
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  currentUser(@Req() req) {
-    return req.user;
+  currentUser(@GetUser() userInfo: User) {
+    return this.usersService.dashboard(userInfo);
   }
 }
