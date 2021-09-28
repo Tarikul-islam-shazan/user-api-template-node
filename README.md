@@ -68,7 +68,7 @@ Controller
 				  └── users.controller.ts
 ```
   
-Service
+Service -> 
 ```
 project
 . └── project/
@@ -80,7 +80,7 @@ project
 
 
 
-Repository 
+Repository -> 
 ```
 . └── project/
 	  └── src/
@@ -180,6 +180,15 @@ To start the project in developer’s watch mode you should type:
 
 To start the project in production mode you should type:
 
-  
 
     npm run start:prod
+
+
+## Running in docker
+
+simplest command to run it in docker is 
+
+```
+docker-compose -f docker-compose.yml up --build
+```
+but, if you find any  error regarding bcrypt, then delete the container and image, go to project folder and delete **dist** and **node_modules** folder and then run this command again. Hope it will solve your issue, but if you face any further issue, please contact me.
