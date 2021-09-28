@@ -39,11 +39,11 @@ For each API there is going to be a **module** and these modules should be inclu
 
 So, basically for each API the flow will be 
 ```
-project
-|----module
-	 |----controller
-	 |----service
-	 |----repository
+. └── project/
+	 └── module/
+		 ├── controller 
+		 ├── service 
+		 └── repository
 ```
 
 
@@ -51,40 +51,42 @@ project
 
 Module:
 ```
-project
-|----src
-     |----users
-          |  users.module.ts**
+. └── project/
+	  └── src/
+		 └── users/
+			 └── users.module.ts**
 ```
   
 
 
 Controller 
 ```
-project
-|----src
-	 |----users
-		  |----controllers
-				  users.controller.ts
+. └── project/
+	  └── src/
+		  └── users/
+			  └── controllers/
+				  └── users.controller.ts
 ```
   
 Service -> 
 ```
 project
-|----src
-	 |----users
-		  |----services
-				  users.service.ts
+. └── project/
+	  └── src/
+		  └── users/
+			  └── services/
+				  └── users.service.ts
 ```
 
 
 
 Repository -> 
 ```
-|----src
-	 |----users
-		  |----repositories
-				  users.repository.ts
+. └── project/
+	  └── src/
+		  └── users/
+			  └── repositories/
+				  └── users.repositories.ts
 ```
 
   
