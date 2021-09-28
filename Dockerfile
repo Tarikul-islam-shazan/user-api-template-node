@@ -6,6 +6,8 @@ COPY package*.json ./
 
 RUN npm install glob rimraf
 
+RUN npm install glob cross-env
+
 RUN npm install --only=development
 
 COPY . .
