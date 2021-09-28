@@ -99,43 +99,42 @@ Repository ->
 
 **Controllers:** It contains all the controller files for the API and the controller’s testing files.
 
-  <br/><br/>
+
 
 **Decorators:** It contains the custom decorators to use in the controller’s API endpoint.
 
-  <br/><br/>
+
 
 **DTO:** It contains the Data transfer object files which are used to define data object and can also apply validation using **class-validators**.
 
-  <br/><br/>
+
 
 **Entities:** It contains the entity file to define how the data should be stored in the database.
 
-  <br/><br/>
 
 **Enums:** It contains the enum files to define the options.
 
-  <br/><br/>
+
 
 **Guards:** It contains the guard files in here **jwt.guard.ts** to authorize the user strategy file in here **jwt.strategy.ts** to authenticate the provided json-web-token while any user logs in.
 
-  <br/><br/>
+
 
 **Interfaces:** It contains the interface file which defines what the jwt payload should contain.
 
-  <br/><br/>
+
 
 **Repositories:** It contains the repository file to interact with the database.
 
-  <br/><br/>
+
 
 **Services:** It contains the service file to process the response of the processed request from controller file and the testing of service files.
 
-  <br/><br/>
+
 
 **Authentication:** We are using jwt based authentication using **passport-jwt** package.
 
-   <br/><br/>
+
 
 ## Documentation:
 
