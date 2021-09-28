@@ -37,11 +37,17 @@ For each API there is going to be a **module** and these modules should be inclu
 
   
 
-So, basically for each API the flow will be **module -> controller -> service -> repository.**
+So, basically for each API the flow will be 
+```
+project
+|----module
+	 |----controller
+	 |----service
+	 |----repository
+```
 
 
-
-## For user’s API
+## Folder Structure For user’s API
 
 Module:
 ```
