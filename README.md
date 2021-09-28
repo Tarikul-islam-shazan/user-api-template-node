@@ -68,7 +68,7 @@ Controller
 				  └── users.controller.ts
 ```
   
-Service -> 
+Service
 ```
 project
 . └── project/
@@ -80,7 +80,7 @@ project
 
 
 
-Repository -> 
+Repository 
 ```
 . └── project/
 	  └── src/
