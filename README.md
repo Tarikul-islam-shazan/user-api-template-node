@@ -57,7 +57,7 @@ project
           |  users.module.ts**
 ```
   
-  <br/><br/>
+
 
 Controller 
 ```
@@ -68,8 +68,6 @@ project
 				  users.controller.ts
 ```
   
-<br/><br/>
-
 Service -> 
 ```
 project
@@ -79,8 +77,7 @@ project
 				  users.service.ts
 ```
 
-<br/><br/>
-  
+
 
 Repository -> 
 ```
@@ -91,7 +88,7 @@ Repository ->
 ```
 
   
-<br/><br/>
+
 
 ## Folder introduction:
 
