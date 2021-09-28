@@ -17,9 +17,11 @@ import { UsersModule } from './users/users.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'mongodb',
-        host: configService.get('DB_HOST'),
+        // host: configService.get('DB_HOST'),
+        // database: configService.get('DB_NAME'),
+        // Added url option and made 2 lines above obsolete as they are not working
+        url: configService.get('DB_URL'),
         port: configService.get('DB_PORT'),
-        database: configService.get('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true,
       }),
