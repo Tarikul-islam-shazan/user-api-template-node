@@ -180,6 +180,7 @@ To start the project in developer’s watch mode you should type:
 
 To start the project in production mode you should type:
 
+  
 
     npm run start:prod
 
@@ -191,4 +192,20 @@ simplest command to run it in docker is
 ```
 docker-compose -f docker-compose.yml up --build
 ```
-but, if you find any  error regarding bcrypt, then delete the container and image, go to project folder and delete **dist** and **node_modules** folder and then run this command again. Hope it will solve your issue, but if you face any further issue, please contact me.
+
+to start dev container and start it immediately
+
+> but, if you find any  error regarding bcrypt, then delete the
+> container and image, go to project folder and delete **dist** and
+> **node_modules** folder and then run this command again. Hope it will solve your issue, but if you face any further issue, please contact
+> me.
+
+To run the container instance:
+
+    docker start nestjs_api_dev
+
+`nestjs_api_dev` is the container name
+
+To stop the container instance
+
+    docker stop nestjs_api_dev
