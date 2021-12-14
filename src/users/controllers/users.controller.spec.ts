@@ -24,6 +24,7 @@ const mockUsersRepository = () => ({
   deleteUser: jest.fn(),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const mockJwtService = () => {};
 
 describe('UsersController', () => {
