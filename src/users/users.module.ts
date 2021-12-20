@@ -8,6 +8,8 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { GoogleController } from './controllers/google.controller';
+import { GoogleStrategy } from './guards/google.strategy';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { JwtStrategy } from './guards/jwt.strategy';
     }),
     TypeOrmModule.forFeature([UsersRepository]),
   ],
-  controllers: [UsersController],
-  providers: [UsersService, JwtStrategy, ConfigService],
+  controllers: [UsersController, GoogleController],
+  providers: [UsersService, JwtStrategy, GoogleStrategy, ConfigService],
 })
 export class UsersModule {}
