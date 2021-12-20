@@ -14,10 +14,6 @@ import { FacebookController } from './controllers/facebook.controller';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    // FacebookAuthModule.forRoot({
-    //   clientId: process.env.APP_ID,
-    //   clientSecret: process.env.APP_SECRET,
-    // }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
