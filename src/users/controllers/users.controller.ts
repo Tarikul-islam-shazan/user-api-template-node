@@ -10,11 +10,14 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
+  HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { GetUser } from '../decorators/get-user.decorator';
 import { User } from '../entities/user.entity';
+import { FacebookGuard } from '../guards/facebook.guard';
 import { JwtGuard } from '../guards/jwt.guard';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';

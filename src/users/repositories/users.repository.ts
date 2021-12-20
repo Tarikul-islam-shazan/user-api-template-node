@@ -69,6 +69,8 @@ export class UsersRepository extends Repository<User> {
   }
 
   async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
+    // console.log(requestingUser);
+    // return 'ok';
     try {
       // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
 
@@ -76,8 +78,9 @@ export class UsersRepository extends Repository<User> {
         // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
+      console.log(requestingUser.id);
 
-      const user = await this.findOne(userId);
+      const user = await this.findOne(requestingUser.id);
 
       if (!user) {
         throw new NotFoundException('User is not found!');
