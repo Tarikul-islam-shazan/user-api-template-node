@@ -19,6 +19,9 @@ import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { RoleBase } from '../enums/user-role.enum';
+import { RolesGuard } from '../guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
@@ -82,4 +85,13 @@ export class UsersController {
   currentUser(@GetUser() userInfo: User) {
     return this.usersService.dashboard(userInfo);
   }
+
+  @Post('acl-test')
+  @ApiBearerAuth()
+  @Roles(RoleBase.admin)
+  @UseGuards(JwtGuard,RolesGuard)
+  aclTest(@Body() cre) {
+    return 'acl okay';
+  }
+
 }
