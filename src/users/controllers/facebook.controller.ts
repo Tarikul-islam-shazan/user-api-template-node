@@ -21,7 +21,6 @@ export class FacebookController {
         data: 'No user from facebook',
       };
     }
-
-    return this.usersService.createUser(req.user);
+    return this.usersService.createUser(req.user.user);
   }
 }

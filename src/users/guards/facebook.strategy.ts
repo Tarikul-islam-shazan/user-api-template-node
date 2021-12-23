@@ -26,9 +26,25 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       firstName: name.givenName,
       lastName: name.familyName,
       email: emails[0].value,
-      password: accessToken,
+      password: this.makePasswd(),
       role: 'user',
     };
-    done(null, user);
+    console.log('password', this.makePasswd());
+    const payload = {
+      user,
+      accessToken,
+    };
+    done(null, payload);
+  }
+
+  makePasswd() {
+    let passwd = '';
+    const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    for (let i = 1; i < 10; i++) {
+      const c = Math.floor(Math.random() * chars.length + 1);
+      passwd += chars.charAt(c);
+    }
+    return passwd;
   }
 }
