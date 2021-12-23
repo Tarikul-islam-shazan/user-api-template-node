@@ -44,17 +44,17 @@ export class UsersRepository extends Repository<User> {
 
       await this.save(newUser);
 
-      // console.log('email sending ...');
-      // try {
-      //   await sendMail({
-      //     toMail: newUser.email,
-      //     subject:'hello world',
-      //     htmlBody: '<h1>Hello World</h1> <br><h3>send email testing</h3>',
-      //   });
-      // } catch (error) {
-      //   console.log(error);
-      //   throw error;
-      // }
+      console.log('email sending ...');
+      try {
+        await sendMail({
+          toMail: newUser.email,
+          subject:'hello world',
+          htmlBody: '<h1>Hello World</h1> <br><h3>send email testing</h3>',
+        });
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
 
       const newValidUser = {
         id: newUser.id,
