@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { sendMail } from "../../utils/mail.handler";
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
@@ -42,6 +43,18 @@ export class UsersRepository extends Repository<User> {
       newUser.password = hashedPassword;
 
       await this.save(newUser);
+
+      // console.log('email sending ...');
+      // try {
+      //   await sendMail({
+      //     toMail: newUser.email,
+      //     subject:'hello world',
+      //     htmlBody: '<h1>Hello World</h1> <br><h3>send email testing</h3>',
+      //   });
+      // } catch (error) {
+      //   console.log(error);
+      //   throw error;
+      // }
 
       const newValidUser = {
         id: newUser.id,
