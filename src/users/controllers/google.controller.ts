@@ -21,6 +21,6 @@ export class GoogleController {
         data: 'No user found',
       };
     }
-    return this.usersService.createUser(req.user);
+    return this.usersService.createUser(req.user.user);
   }
 }
