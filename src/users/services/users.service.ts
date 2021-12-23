@@ -15,6 +15,9 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { ResetPasswordDto } from './../dto/reset-password.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { sendMail } from "../../utils/mail.handler";
 
 @Injectable()
 export class UsersService {
@@ -121,6 +124,94 @@ export class UsersService {
     } catch (err) {
       this.logger.error(
         `"L:122", "src/users/services/users.service.ts", User data could not be loaded!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async forgotPassword(forgotPasswordObj: ForgotPasswordDto) {
+    try {
+      const { email } = forgotPasswordObj;
+
+      const isEmailValid = await this.usersRepository.findOne({ email });
+      if (!isEmailValid) {
+        throw new UnauthorizedException('Invalid email or password!');
+      }
+
+      const secret = process.env.JWT_SECRET + isEmailValid.password
+
+      const payLoad = {
+        email: isEmailValid.email,
+        id: isEmailValid.id
+      };
+
+      const token = this.jwtService.sign(payLoad, { secret, expiresIn: process.env.JWT_EXPIRES_FOR_EMAIL });
+
+      const link = `http://localhost:3000/users/reset-password/${isEmailValid.id}/${token}`;
+      console.log(link);
+
+      console.log('email sending...');
+      await sendMail({
+        toMail: isEmailValid.email,
+        subject:'Reset password',
+        htmlBody: link,
+      });
+
+      this.logger.verbose(
+        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+          link,
+        )}`,
+      );
+
+      return 'Please check you email...';
+    } catch (err) {
+      this.logger.error(
+        `"L:92", "src/users/services/users.service.ts", User is not valid!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async resetPassword(userId, token, resetPassworddObj: ResetPasswordDto) {
+    try {
+      const { newPassword, conformPassword } = resetPassworddObj;
+      
+      if(newPassword !== conformPassword){
+        throw new UnauthorizedException('Password not match!');
+      }
+
+      const isValidUser = await this.usersRepository.findOne(userId);
+      if (!isValidUser) {
+        throw new UnauthorizedException('Invalid email or password!');
+      }
+
+      const secret = process.env.JWT_SECRET + isValidUser.password
+
+      const payLoad = this.jwtService.verify(token, { secret })
+
+      if (!payLoad) {
+        throw new UnauthorizedException('not verify');
+      }
+
+      const salt = await bcrypt.genSalt(12);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      isValidUser.password = hashedPassword;
+      this.usersRepository.save(isValidUser);
+
+
+      this.logger.verbose(
+        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+          token,
+        )}`,
+      );
+
+      return 'Password Reset successfully';
+    } catch (err) {
+      this.logger.error(
+        `"L:92", "src/users/services/users.service.ts", User is not valid!`,
         err.stack,
       );
       throw new InternalServerErrorException();
