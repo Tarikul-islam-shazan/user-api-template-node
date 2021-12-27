@@ -1,106 +1,85 @@
-import { JwtService } from '@nestjs/jwt';
-import { Test } from '@nestjs/testing';
-
-import { JwtGuard } from '../guards/jwt.guard';
-import { UsersRepository } from '../repositories/users.repository';
-import { UsersService } from '../services/users.service';
-import { UsersController } from './users.controller';
-
-const mockUser = {
-  id: 'someID',
-  firstName: 'first',
-  lastName: 'last',
-  email: 'email',
-  role: 'role',
-};
-
-const mockAuthGuard = () => ({});
-
-const mockUsersRepository = () => ({
-  getUsers: jest.fn(),
-  createUser: jest.fn(),
-  getSingleUser: jest.fn(),
-  updateUser: jest.fn(),
-  deleteUser: jest.fn(),
-});
-
-const mockJwtService = () => {};
+import { Test, TestingModule } from "@nestjs/testing";
+import { UpdateUserDto } from "../dto/update-user.dto";
+import { CreateUserDto } from "../dto/create-user.dto";
+import { RoleBase } from "../enums/user-role.enum";
+import { UsersService } from "../services/users.service";
+const httpMocks = require('node-mocks-http');
+import { UsersController } from "./users.controller";
+import { ObjectID } from 'typeorm';
 
 describe('UsersController', () => {
   let usersController: UsersController;
-  let usersService;
-  let usersRepository;
+  let usersService: UsersService;
+
+  const mockUserService = {
+    createUser: jest.fn(dto => {
+      return {
+        id: ObjectID,
+        ...dto
+      }
+    }),
+    updateUser: jest.fn().mockImplementation((id, dto) => {
+      return {
+        id,
+        ...dto
+      }
+    })
+  }
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        UsersService,
-        { provide: UsersRepository, useFactory: mockUsersRepository },
-        {
-          provide: JwtService,
-          useFactory: mockJwtService,
-        },
-      ],
+        UsersService
+      ]
     })
-      .overrideProvider(JwtGuard)
-      .useClass(mockAuthGuard)
-      .compile();
+      .overrideProvider(UsersService)
+      .useValue(mockUserService)
+      .compile()
 
-    usersController = module.get(UsersController);
-    usersService = module.get(UsersService);
-    usersRepository = module.get(UsersRepository);
+    usersService = moduleRef.get<UsersService>(UsersService);
+    usersController = moduleRef.get<UsersController>(UsersController);
+
   });
 
-  describe('getUsers', () => {
-    it('should return an array of users or a message', async () => {
-      usersRepository.getUsers.mockResolvedValue('someValue');
-      const result = await usersService.getUsers(null, null);
-      const finalResult = await usersController.getUsers(null, null, null);
+  it('should be defined', () => {
+    expect(usersController).toBeDefined();
+  });
 
-      expect(finalResult).toEqual(result);
+
+  it('should create a new user', () => {
+    const mockUser: CreateUserDto = { firstName: 'John', lastName: 'Doe', email: 'johndoe@gmail.com', password: 'johndoe', role: RoleBase.user };
+    expect(usersService.createUser(mockUser)).toEqual({
+      firstName: mockUser.firstName,
+      lastName: mockUser.lastName,
+      email: mockUser.email,
+      password: mockUser.password,
+      role: mockUser.role
+    })
+
+    expect(mockUserService.createUser).toHaveBeenCalledWith(mockUser)
+  })
+
+  // it('should show all user', () => {
+
+  // });
+
+  // it('should show a user', () => {
+
+  // });
+
+  it('should update a user', () => {
+    const mockUser: UpdateUserDto = { firstName: 'John', lastName: 'Doe', email: 'johndoe@gmail.com', password: 'johndoe' }
+    expect(usersController.updateUser('1', mockUser, null)).toEqual({
+      id: '1',
+      ...mockUser
     });
+    expect(mockUserService.updateUser).toHaveBeenCalled();
   });
 
-  describe('createUser', () => {
-    it('should create a user and return the result', async () => {
-      usersRepository.createUser.mockResolvedValue(mockUser);
-      const result = await usersService.createUser(null);
-      const finalResult = await usersController.createUser(null);
+  // it('should delete a user', () => {
 
-      expect(finalResult).toEqual(result);
-    });
-  });
+  // });
 
-  describe('singleUser', () => {
-    it('should find a user by ID and return the result', async () => {
-      usersRepository.getSingleUser.mockResolvedValue(mockUser);
-      const result = await usersService.getSingleUser(null, null);
-      const finalResult = await usersController.getSingleUser(null, null);
 
-      expect(finalResult).toEqual(result);
-    });
-  });
-
-  describe('updateUser', () => {
-    it('should find a user by ID, update the user and return the result', async () => {
-      usersRepository.updateUser.mockResolvedValue(mockUser);
-      const result = await usersService.updateUser(null, null, null);
-      const finalResult = await usersController.updateUser(null, null, null);
-
-      expect(finalResult).toEqual(result);
-    });
-  });
-
-  describe('deleteUser', () => {
-    it('should find a user by ID, delete it and return the result', async () => {
-      usersRepository.deleteUser.mockResolvedValue(
-        'The task with userId is deleted!',
-      );
-      const result = await usersService.deleteUser(null, null);
-      const finalResult = await usersController.deleteUser(null, null);
-
-      expect(finalResult).toEqual(result);
-    });
-  });
 });
