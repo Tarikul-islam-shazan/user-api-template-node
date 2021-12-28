@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { configValidationSchema } from './config.schema';
 import { UsersModule } from './users/users.module';
-
+import { DatabaseModule } from './common/database/database.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -12,20 +12,7 @@ import { UsersModule } from './users/users.module';
       validationSchema: configValidationSchema,
     }),
     UsersModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'mongodb',
-        // host: configService.get('DB_HOST'),
-        // database: configService.get('DB_NAME'),
-        // Added url option and made 2 lines above obsolete as they are not working
-        url: configService.get('DB_URL'),
-        port: configService.get('DB_PORT'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
-    }),
+    DatabaseModule
   ],
 })
 export class AppModule {}
