@@ -8,6 +8,8 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { ProfileController } from './controllers/profile.controller';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -23,8 +25,15 @@ import { JwtStrategy } from './guards/jwt.strategy';
       }),
     }),
     TypeOrmModule.forFeature([UsersRepository]),
+    MulterModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        dest: configService.get('FILE_PATH'),
+      }),
+    }),
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, ProfileController],
   providers: [UsersService, JwtStrategy, ConfigService],
 })
 export class UsersModule {}

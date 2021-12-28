@@ -13,6 +13,9 @@ export class User {
   lastName: string;
 
   @Column()
+  profileImagePath: string;
+
+  @Column()
   email: string;
 
   @Column()

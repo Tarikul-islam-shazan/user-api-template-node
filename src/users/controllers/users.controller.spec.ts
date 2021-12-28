@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 

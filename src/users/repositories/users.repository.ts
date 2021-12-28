@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import {
   BadRequestException,
   ForbiddenException,
@@ -11,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { ProfileUserDto } from '../dto/profile-user.dto';
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
@@ -86,6 +88,7 @@ export class UsersRepository extends Repository<User> {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
+        profileImagePath: user.profileImagePath,
         email: user.email,
         role: user.role,
       };
@@ -97,6 +100,31 @@ export class UsersRepository extends Repository<User> {
       );
 
       return userInfo;
+    } catch (err) {
+      this.logger.error(
+        `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getUserProfileImage(userId: string): Promise<string> {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+
+      this.logger.verbose(
+        `"L:93", "src/users/repositories/users.repository.ts", User profile image path found! Data: ${JSON.stringify(
+          user.profileImagePath,
+        )}`,
+      );
+
+      return user.profileImagePath;
     } catch (err) {
       this.logger.error(
         `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
@@ -160,6 +188,35 @@ export class UsersRepository extends Repository<User> {
       );
 
       return updatedUserInfo;
+    } catch (err) {
+      this.logger.error(
+        `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async updateProfielUser(userId: string, profileUser: ProfileUserDto) {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+      const { firstName, lastName, profileImagePath } = profileUser;
+      const updatedUser = user;
+      if (firstName) {
+        updatedUser.firstName = firstName;
+      }
+      if (lastName) {
+        updatedUser.lastName = lastName;
+      }
+      if (profileImagePath) {
+        updatedUser.profileImagePath = profileImagePath;
+      }
+      this.save(updatedUser);
     } catch (err) {
       this.logger.error(
         `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
