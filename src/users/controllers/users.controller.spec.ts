@@ -5,25 +5,56 @@ import { RoleBase } from "../enums/user-role.enum";
 import { UsersService } from "../services/users.service";
 const httpMocks = require('node-mocks-http');
 import { UsersController } from "./users.controller";
-import { ObjectID } from 'typeorm';
+import { DeleteResult, UpdateResult, ObjectID } from 'typeorm';
+import { User } from "../entities/user.entity";
+import { LoginUserDto } from "../dto/login-user.dto";
 
 describe('UsersController', () => {
   let usersController: UsersController;
   let usersService: UsersService;
 
+
+
+  const mockRequest = httpMocks.createRequest();
+  mockRequest.user = new User();
+  mockRequest.user.firstName = 'Jon';
+
+
+  const mockDeleteResult: DeleteResult = {
+    raw: [],
+    affected: 1,
+  };
+
+  const mockUpdateResult: UpdateResult = {
+    ...mockDeleteResult,
+    generatedMaps: [],
+  };
+
   const mockUserService = {
-    createUser: jest.fn(dto => {
+    createUser: jest.fn().mockImplementation((createUserDto: CreateUserDto) => {
       return {
         id: ObjectID,
-        ...dto
+        ...createUserDto
       }
     }),
-    updateUser: jest.fn().mockImplementation((id, dto) => {
-      return {
-        id,
-        ...dto
-      }
-    })
+    getUsers: jest.fn().mockImplementation((skip: number, limit: number, requestingUser: User) => {
+
+    }),
+    getSingleUser: jest.fn().mockImplementation((userId: string, requestingUser: User) => {
+
+    }),
+    updateUser: jest.fn().mockImplementation(() => {
+      return mockUpdateResult;
+    }),
+    deleteUser: jest.fn().mockImplementation(() => {
+      return mockDeleteResult;
+    }),
+    login: jest.fn().mockImplementation((loginUserDto: LoginUserDto) => {
+
+    }),
+    dashboard: jest.fn().mockImplementation((userInfo: User) => {
+
+    }),
   }
 
   beforeEach(async () => {
@@ -60,6 +91,10 @@ describe('UsersController', () => {
     expect(mockUserService.createUser).toHaveBeenCalledWith(mockUser)
   })
 
+
+  // it('should create a new user2', () => {
+  //   expect(usersController.createUser(mockRequest))
+  // })
   // it('should show all user', () => {
 
   // });
@@ -78,7 +113,7 @@ describe('UsersController', () => {
   });
 
   // it('should delete a user', () => {
-
+  //   expect(usersController.deleteUser('1',mockRequest)).toEqual(mockDeleteResult);
   // });
 
 
