@@ -8,7 +8,6 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
-import { ProfileController } from './controllers/profile.controller';
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
@@ -33,7 +32,7 @@ import { MulterModule } from '@nestjs/platform-express';
       }),
     }),
   ],
-  controllers: [UsersController, ProfileController],
+  controllers: [UsersController],
   providers: [UsersService, JwtStrategy, ConfigService],
 })
 export class UsersModule {}
