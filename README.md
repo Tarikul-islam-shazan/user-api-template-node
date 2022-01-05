@@ -211,3 +211,58 @@ To run the container instance:
 To stop the container instance
 
     docker stop nestjs_api_dev
+
+# multiple database connection 
+- when you change database, you need to delete dist folder first.
+- if you use SQL then you need to add @PrimaryGeneratedColumn() as a entity id-decorator.
+
+## 1. PostgreSql
+## if you use docker,postgres in docker command  
+```sh
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_USERNAME=postgres postgres
+```
+### put this value inside .env file
+- note: you can put your own database name,port or other thing
+
+```sh
+POSTGRES_DB_HOST=127.0.0.1
+POSTGRES_DB_PORT=5432
+POSTGRES_DB_NAME=quickstartnode
+POSTGRES_DB_USER=postgres
+POSTGRES_DB_PASSWORD=password
+```
+
+### pgsql- database create using command 
+```sh
+psql -l
+psql -d template1
+create database quickstartnode with owner postgres ENCODING 'UTF8';
+\q
+psql -l
+```
+
+
+## mysql
+- if you want to use docker.
+
+```sh
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_USERNAME=root mysql
+```
+
+### put this value inside .env file, for MYSQL connection
+- note: you put your database name,port or other thing
+
+```sh
+MYSQL_DB_HOST=127.0.0.1
+MYSQL_DB_PORT=3306
+MYSQL_DB_USER=root
+MYSQL_DB_PASSWORD=root
+MYSQL_DB_NAME=quickstartnode
+```
+
+### mysql- database create using command
+```sh
+mysql -u root -p
+create database quickstartnode;
+show databases;
+```

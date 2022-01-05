@@ -1,8 +1,9 @@
-import { Entity, ObjectIdColumn, ObjectID, Column } from 'typeorm';
+import { Entity, ObjectIdColumn, ObjectID, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { RoleBase } from '../enums/user-role.enum';
 
 @Entity()
 export class User {
+  @PrimaryGeneratedColumn()
   @ObjectIdColumn()
   id: ObjectID;
 
