@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { UserModel } from '../models/user.model';
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
@@ -68,9 +69,51 @@ export class UsersRepository extends Repository<User> {
     }
   }
 
+  async createFacebookUser(createUserDto: CreateUserDto): Promise<UserModel> {
+    try {
+      const { firstName, lastName, email, role } = createUserDto;
+
+      const newUser = this.create({
+        firstName,
+        lastName,
+        email,
+        role,
+      });
+
+      const ifUserExists = await this.findOne({
+        email: newUser.email,
+      });
+
+      if (ifUserExists) {
+        return ifUserExists;
+      }
+
+      await this.save(newUser);
+
+      const newValidUser = {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+      };
+
+      this.logger.verbose(
+        `"L:54", "src/users/repositories/users.repository.ts", A new user is created! Data: ${JSON.stringify(
+          newValidUser,
+        )}`,
+      );
+      return newValidUser;
+    } catch (err) {
+      this.logger.error(
+        `"L:62", "src/users/repositories/users.repository.ts", The User already exists!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
   async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
-    // console.log(requestingUser);
-    // return 'ok';
     try {
       // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
 

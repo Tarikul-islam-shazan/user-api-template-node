@@ -7,6 +7,9 @@
 /dist
 /node_modules
 
+#files
+/files
+
 # Logs
 logs
 *.log

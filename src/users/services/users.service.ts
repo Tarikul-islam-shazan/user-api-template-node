@@ -31,6 +31,32 @@ export class UsersService {
     return this.usersRepository.createUser(createUserDto);
   }
 
+  async createFacebookUser(
+    createUserDto: CreateUserDto,
+  ): Promise<{ accessToken }> {
+    const fbUser = await this.usersRepository.createFacebookUser(createUserDto);
+    const { email, id, role } = fbUser;
+
+    const isEmailValid = await this.usersRepository.findOne({ email });
+    if (!isEmailValid) {
+      throw new UnauthorizedException('Invalid email or password!');
+    }
+
+    const payLoad: JwtPayload = {
+      id: id,
+      role: role,
+    };
+    const accessToken = await this.jwtService.sign(payLoad);
+
+    this.logger.verbose(
+      `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+        accessToken,
+      )}`,
+    );
+
+    return { accessToken };
+  }
+
   async getUsers(
     skip: number,
     limit: number,

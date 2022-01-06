@@ -26,10 +26,10 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       firstName: name.givenName,
       lastName: name.familyName,
       email: emails[0].value,
-      password: this.makePasswd(),
+      // password: this.makePasswd(),
       role: 'user',
     };
-    console.log('password', this.makePasswd());
+    // console.log('password', this.makePasswd());
     const payload = {
       user,
       accessToken,
@@ -37,14 +37,14 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done(null, payload);
   }
 
-  makePasswd() {
-    let passwd = '';
-    const chars =
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    for (let i = 1; i < 10; i++) {
-      const c = Math.floor(Math.random() * chars.length + 1);
-      passwd += chars.charAt(c);
-    }
-    return passwd;
-  }
+  // makePasswd() {
+  //   let passwd = '';
+  //   const chars =
+  //     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  //   for (let i = 1; i < 10; i++) {
+  //     const c = Math.floor(Math.random() * chars.length + 1);
+  //     passwd += chars.charAt(c);
+  //   }
+  //   return passwd;
+  // }
 }
