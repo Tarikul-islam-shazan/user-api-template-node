@@ -132,11 +132,16 @@ export class UsersService {
 
   async forgotPassword(forgotPasswordObj: ForgotPasswordDto) {
     try {
+      const responseMessage = {
+        message: 'Email send to your registed email'
+      }
+
       const { email } = forgotPasswordObj;
 
       const isEmailValid = await this.usersRepository.findOne({ email });
       if (!isEmailValid) {
-        throw new UnauthorizedException('Invalid email or password!');
+        return responseMessage;
+        // throw new UnauthorizedException('Invalid email or password!');
       }
 
       const secret = process.env.JWT_SECRET + isEmailValid.password
@@ -148,23 +153,24 @@ export class UsersService {
 
       const token = this.jwtService.sign(payLoad, { secret, expiresIn: process.env.JWT_EXPIRES_FOR_EMAIL });
 
-      const link = `http://localhost:3000/users/reset-password/${isEmailValid.id}/${token}`;
+      const link = `http://localhost:${process.env.APP_PORT}/users/reset-password/${isEmailValid.id}/${token}`;
       console.log(link);
 
       console.log('email sending...');
       await sendMail({
         toMail: isEmailValid.email,
-        subject:'Reset password',
+        subject: 'Reset password',
         htmlBody: link,
       });
 
       this.logger.verbose(
-        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+        `"L:167", "src/users/services/users.service.ts", Reset password link send ${JSON.stringify(
           link,
         )}`,
       );
 
-      return 'Please check you email...';
+      return responseMessage;
+
     } catch (err) {
       this.logger.error(
         `"L:92", "src/users/services/users.service.ts", User is not valid!`,
@@ -174,11 +180,24 @@ export class UsersService {
     }
   }
 
+  async resetPasswordGetRequest(userId, token) {
+    const response = {
+      massage: 'Please enter your password...'
+    };
+
+    this.logger.verbose(
+      `"L:227", "src/users/services/users.service.ts"${JSON.stringify(
+        response
+      )}`,
+    );
+    return response;
+  }
+
   async resetPassword(userId, token, resetPassworddObj: ResetPasswordDto) {
     try {
       const { newPassword, conformPassword } = resetPassworddObj;
-      
-      if(newPassword !== conformPassword){
+
+      if (newPassword !== conformPassword) {
         throw new UnauthorizedException('Password not match!');
       }
 
@@ -200,18 +219,22 @@ export class UsersService {
 
       isValidUser.password = hashedPassword;
       this.usersRepository.save(isValidUser);
-
+      
+      const response = {
+        message: 'Password Reset successfully'
+      }
 
       this.logger.verbose(
-        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
-          token,
+        `"L:84", "src/users/services/users.service.ts", Reset password successfull ! Token: ${JSON.stringify(
+          response,
         )}`,
       );
 
-      return 'Password Reset successfully';
+      return response;
+
     } catch (err) {
       this.logger.error(
-        `"L:92", "src/users/services/users.service.ts", User is not valid!`,
+        `"L:237", "src/users/services/users.service.ts", Reset password failed !`,
         err.stack,
       );
       throw new InternalServerErrorException();

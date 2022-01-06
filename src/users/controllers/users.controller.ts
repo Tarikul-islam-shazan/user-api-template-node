@@ -90,6 +90,14 @@ export class UsersController {
     return this.usersService.forgotPassword(forgotPasswordObj);
   }
 
+  @Get('reset-password/:id/:token')
+  resetPasswordForGet(
+    @Param('id') userId: string,
+    @Param('token') token: string){
+    
+    return this.usersService.resetPasswordGetRequest(userId,token);
+  }
+
   @Post('reset-password/:id/:token')
   resetPassword(
     @Param('id') userId: string,
