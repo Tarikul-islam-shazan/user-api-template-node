@@ -44,10 +44,9 @@ export class CustomersRepository extends Repository<Customer> {
         city: newCustomer.city,
         zip: newCustomer.zip,
       };
-      console.log(newValidCustomer);
 
       this.logger.verbose(
-        `"L:54", "src/customers/repositories/customers.repository.ts", A new customer is created! Data: ${JSON.stringify(
+        `"L:50", "src/customers/repositories/customers.repository.ts", A new customer is created! Data: ${JSON.stringify(
           newValidCustomer,
         )}`,
       );
@@ -55,7 +54,51 @@ export class CustomersRepository extends Repository<Customer> {
       return newValidCustomer;
     } catch (err) {
       this.logger.error(
-        `"L:62", "src/customers/repositories/customers.repository.ts", The Customer create error occured!`,
+        `"L:58", "src/customers/repositories/customers.repository.ts", The Customer create error occured!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCustomers(
+    skip: number,
+    limit: number,
+    //requestingUser: User,
+  ): Promise<any> {
+    try {
+      skip = skip ? skip : 0;
+      limit = limit ? limit : 2;
+
+      const customerList = await this.find({
+        skip: skip,
+        take: limit,
+      });
+
+      if (customerList.length === 0) {
+        this.logger.log(
+          `"L:80", "src/customers/repositories/customers.repository.ts", No data to show!`,
+        );
+        return 'There are no customers to show!';
+      }
+
+      this.logger.verbose(
+        `"L:86", "src/customers/repositories/customers.repository.ts", Customers' list is loaded! Data: ${JSON.stringify(
+          customerList,
+        )}`,
+      );
+
+      return customerList.map((customer) => ({
+        id: customer._id,
+        customerId: customer.customerId,
+        userId: customer.userId,
+        city: customer.city,
+        state: customer.state,
+        zip: customer.zip,
+      }));
+    } catch (err) {
+      this.logger.error(
+        `"L:101", "src/customers/repositories/customers.repository.ts", Failed to load the users list`,
         err.stack,
       );
       throw new InternalServerErrorException();
