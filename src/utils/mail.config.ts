@@ -1,14 +1,19 @@
 import * as nodemailer from 'nodemailer';
 import * as smtpTransport from "nodemailer-smtp-transport";
+import { ConfigService } from "@nestjs/config";
+
+function getConfigService(value) {
+    let configService = new ConfigService();
+    return configService.get(value);
+}
 
 const mailTransporter = nodemailer.createTransport(smtpTransport({
-    // host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: true, // true for 465, false for other ports
-    service: process.env.SMTP_SERVICE,
+    port: getConfigService('SMTP_PORT'),
+    secure: true,
+    service: getConfigService('SMTP_SERVICE'),
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_USER_PASS,
+        user: getConfigService('SMTP_USER'),
+        pass: getConfigService('SMTP_USER_PASS')
     },
     tls: {
         rejectUnauthorized: true,
