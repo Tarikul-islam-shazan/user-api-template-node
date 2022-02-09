@@ -8,6 +8,7 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { JwtStrategy } from './guards/jwt.strategy';
       }),
     }),
     TypeOrmModule.forFeature([UsersRepository]),
+    HttpModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, JwtStrategy, ConfigService],

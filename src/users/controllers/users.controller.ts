@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import {
   Controller,
   Post,
@@ -15,6 +16,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { GetUser } from '../decorators/get-user.decorator';
 import { User } from '../entities/user.entity';
 import { JwtGuard } from '../guards/jwt.guard';
+import { RecaptchaGuard } from '../guards/recaptcha.guard';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
@@ -23,6 +25,14 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('test-reCAPTCHA')
+  @UseGuards(RecaptchaGuard)
+  getData() {
+    return {
+      data: 'ok',
+    };
+  }
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
