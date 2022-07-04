@@ -16,6 +16,10 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { ResetPasswordDto } from './../dto/reset-password.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { sendMail } from "../../utils/mail.handler";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +29,7 @@ export class UsersService {
     @InjectRepository(UsersRepository)
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
+    private configService: ConfigService
   ) {}
 
   createUser(createUserDto: CreateUserDto): Promise<Object> {
@@ -83,7 +88,7 @@ export class UsersService {
       const accessToken = await this.jwtService.sign(payLoad);
 
       this.logger.verbose(
-        `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+        `"login", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
           accessToken,
         )}`,
       );
@@ -91,7 +96,7 @@ export class UsersService {
       return { accessToken };
     } catch (err) {
       this.logger.error(
-        `"L:92", "src/users/services/users.service.ts", User is not valid!`,
+        `"login", "src/users/services/users.service.ts", User is not valid!`,
         err.stack,
       );
       throw new InternalServerErrorException();
@@ -113,7 +118,7 @@ export class UsersService {
       };
 
       this.logger.verbose(
-        `"L:114", "src/users/services/users.service.ts", Dashboard data loaded. Data: ${JSON.stringify(
+        `"dashboard", "src/users/services/users.service.ts", Dashboard data loaded. Data: ${JSON.stringify(
           currentUser,
         )}`,
       );
@@ -121,7 +126,115 @@ export class UsersService {
       return currentUser;
     } catch (err) {
       this.logger.error(
-        `"L:122", "src/users/services/users.service.ts", User data could not be loaded!`,
+        `"dashboard", "src/users/services/users.service.ts", User data could not be loaded!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async forgotPassword(forgotPasswordObj: ForgotPasswordDto) {
+    try {
+      const responseMessage = {
+        message: 'Email send to your registed email'
+      }
+
+      const { email } = forgotPasswordObj;
+
+      const isEmailValid = await this.usersRepository.findOne({ email });
+      if (!isEmailValid) {
+        return responseMessage;
+      }
+
+      const secret = this.configService.get('JWT_SECRET') + isEmailValid.password
+
+      const payLoad = {
+        email: isEmailValid.email,
+        id: isEmailValid.id
+      };
+
+      const token = this.jwtService.sign(payLoad, { secret, expiresIn: this.configService.get('JWT_EXPIRES_FOR_EMAIL')});
+
+      const link = `${this.configService.get('APP_HOSTNAME')}:${this.configService.get('APP_PORT')}/users/reset-password/${isEmailValid.id}/${token}`;
+
+      await sendMail({
+        toMail: isEmailValid.email,
+        subject: 'Reset password',
+        htmlBody: link,
+      });
+
+      this.logger.verbose(
+        `"forgotPassword", "src/users/services/users.service.ts", Reset password link send ${JSON.stringify(
+          link,
+        )}`,
+      );
+
+      return responseMessage;
+
+    } catch (err) {
+      this.logger.error(
+        `"forgotPassword", "src/users/services/users.service.ts", User is not valid!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async resetPasswordGetRequest(userId, token) {
+    const response = {
+      massage: 'Please enter your password...'
+    };
+
+    this.logger.verbose(
+      `"resetPasswordGetRequest", "src/users/services/users.service.ts"${JSON.stringify(
+        response
+      )}`,
+    );
+    return response;
+  }
+
+  async resetPassword(userId, token, resetPassworddObj: ResetPasswordDto) {
+    try {
+      const { newPassword, conformPassword } = resetPassworddObj;
+
+      if (newPassword !== conformPassword) {
+        throw new UnauthorizedException('Password not match!');
+      }
+
+      const isValidUser = await this.usersRepository.findOne(userId);
+      if (!isValidUser) {
+        throw new UnauthorizedException('Invalid email or password!');
+      }
+
+      const secret = this.configService.get('JWT_SECRET') + isValidUser.password
+
+      const payLoad = this.jwtService.verify(token, { secret })
+
+      if (!payLoad) {
+        throw new UnauthorizedException('not verify');
+      }
+
+      const salt = await bcrypt.genSalt(12);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      isValidUser.password = hashedPassword;
+      this.usersRepository.save(isValidUser);
+      
+      const response = {
+        message: 'Password Reset successfully'
+      }
+
+      this.logger.verbose(
+        `"resetPassword", "src/users/services/users.service.ts", Reset password successfull ! Token: ${JSON.stringify(
+          response,
+        )}`,
+      );
+
+      return response;
+
+    } catch (err) {
+      this.logger.error(
+        `"resetPassword", "src/users/services/users.service.ts", Reset password failed !`,
         err.stack,
       );
       throw new InternalServerErrorException();

@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { sendMail } from "../../utils/mail.handler";
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
@@ -70,10 +71,8 @@ export class UsersRepository extends Repository<User> {
 
   async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
 
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -115,10 +114,7 @@ export class UsersRepository extends Repository<User> {
     requestingUser: User,
   ): Promise<Object> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -174,10 +170,7 @@ export class UsersRepository extends Repository<User> {
 
   async deleteUser(userId: string, requestingUser: User): Promise<string> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -188,7 +181,7 @@ export class UsersRepository extends Repository<User> {
       }
 
       this.logger.log(
-        `"L:189", "src/users/repositories/users.repository.ts", The task with ID ${JSON.stringify(
+        `"deleteUser", "src/users/repositories/users.repository.ts", The task with ID ${JSON.stringify(
           userId,
         )} is deleted!`,
       );
@@ -196,7 +189,7 @@ export class UsersRepository extends Repository<User> {
       return `The task with ID ${userId} is deleted!`;
     } catch (err) {
       this.logger.error(
-        `"L:197", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+        `"deleteUser", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
           userId,
         )} is not found!`,
         err.stack,
@@ -214,13 +207,7 @@ export class UsersRepository extends Repository<User> {
       skip = skip ? skip : 0;
       limit = limit ? limit : 2;
 
-      // console.log(typeof skip);
-      // console.log(typeof limit);
-
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -231,13 +218,13 @@ export class UsersRepository extends Repository<User> {
 
       if (usersList.length === 0) {
         this.logger.log(
-          `"L:232", "src/users/repositories/users.repository.ts", No data to show!`,
+          `"getUsers", "src/users/repositories/users.repository.ts", No data to show!`,
         );
         return 'There are no users to show!';
       }
 
       this.logger.verbose(
-        `"L:238", "src/users/repositories/users.repository.ts", User's list is loaded! Data: ${JSON.stringify(
+        `"getUsers", "src/users/repositories/users.repository.ts", User's list is loaded! Data: ${JSON.stringify(
           usersList,
         )}`,
       );
