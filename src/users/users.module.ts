@@ -8,6 +8,7 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { HttpModule } from '@nestjs/axios';
 import { MulterModule } from '@nestjs/platform-express';
 import { GoogleController } from './controllers/google.controller';
 import { GoogleStrategy } from './guards/google.strategy';
@@ -29,6 +30,7 @@ import { RolesGuard } from './guards/roles.guard';
       }),
     }),
     TypeOrmModule.forFeature([UsersRepository]),
+    HttpModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

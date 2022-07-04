@@ -24,6 +24,7 @@ import { GetUser } from '../decorators/get-user.decorator';
 import { ProfileUserDto } from '../dto/profile-user.dto';
 import { User } from '../entities/user.entity';
 import { JwtGuard } from '../guards/jwt.guard';
+import { RecaptchaGuard } from '../guards/recaptcha.guard';
 import { UsersService } from '../services/users.service';
 import { editFileName, imageFileFilter } from '../utils/file-upload.utils';
 import { CreateUserDto } from './../dto/create-user.dto';
@@ -38,6 +39,14 @@ import { RolesGuard } from '../guards/roles.guard';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('test-reCAPTCHA')
+  @UseGuards(RecaptchaGuard)
+  getData() {
+    return {
+      data: 'ok',
+    };
+  }
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
