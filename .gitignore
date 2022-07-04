@@ -7,7 +7,7 @@
 /dist
 /node_modules
 
-# file path
+#files
 /files
 
 # Logs
