@@ -8,6 +8,10 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { GoogleController } from './controllers/google.controller';
+import { GoogleStrategy } from './guards/google.strategy';
+import { FacebookStrategy } from './guards/facebook.strategy';
+import { FacebookController } from './controllers/facebook.controller';
 
 @Module({
   imports: [
@@ -24,7 +28,7 @@ import { JwtStrategy } from './guards/jwt.strategy';
     }),
     TypeOrmModule.forFeature([UsersRepository]),
   ],
-  controllers: [UsersController],
-  providers: [UsersService, JwtStrategy, ConfigService],
+  controllers: [UsersController, GoogleController, FacebookController],
+  providers: [UsersService, JwtStrategy, GoogleStrategy, ConfigService, FacebookStrategy],
 })
 export class UsersModule {}

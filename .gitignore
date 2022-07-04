@@ -7,7 +7,11 @@
 /dist
 /node_modules
 
+<<<<<<< HEAD
 #file upload
+=======
+#files
+>>>>>>> fc7a03a8a034b18a184c5d10db64222e5325133e
 /files
 
 # Logs
