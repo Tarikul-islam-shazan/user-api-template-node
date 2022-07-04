@@ -266,3 +266,20 @@ mysql -u root -p
 create database quickstartnode;
 show databases;
 ```
+## List of feature check mark for Done. uncheck for Not done
+- [x] Multipole DB integration
+- [x] CRUD operation
+- [x] Authentication (token based, Facebook, Google)
+- [x] Authorization
+- [x] Docker
+- [x] User profile 
+- [x] ACL implementation 
+- [x] Forgot & Reset Password
+- [x] Email sending capability 
+- [x] Swagger documentation
+- [x] Postman test ready
+- [x] Unit test implementation 
+- [ ] Integrarion test
+- [ ] CI/CD 
+
+

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
 import { Logger, ValidationPipe } from '@nestjs/common';
@@ -13,7 +14,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, { cors: true });
     const configService = new ConfigService();
     const port = configService.get('APP_PORT');
     const logger = new Logger();

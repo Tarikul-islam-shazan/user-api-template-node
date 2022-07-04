@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import {
   BadRequestException,
   ForbiddenException,
@@ -11,6 +12,9 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { ProfileUserDto } from '../dto/profile-user.dto';
+import { UserModel } from '../models/user.model';
+import { sendMail } from "../../utils/mail.handler";
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
@@ -67,16 +71,59 @@ export class UsersRepository extends Repository<User> {
     }
   }
 
-  async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
+  async createFacebookUser(createUserDto: CreateUserDto): Promise<UserModel> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
+      const { firstName, lastName, email, role } = createUserDto;
 
-      if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
-        throw new ForbiddenException('The user is not allowed to access!');
+      const newUser = this.create({
+        firstName,
+        lastName,
+        email,
+        role,
+      });
+
+      const ifUserExists = await this.findOne({
+        email: newUser.email,
+      });
+
+      if (ifUserExists) {
+        return ifUserExists;
       }
 
-      const user = await this.findOne(userId);
+      await this.save(newUser);
+
+      const newValidUser = {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+      };
+
+      this.logger.verbose(
+        `"L:54", "src/users/repositories/users.repository.ts", A new user is created! Data: ${JSON.stringify(
+          newValidUser,
+        )}`,
+      );
+      return newValidUser;
+    } catch (err) {
+      this.logger.error(
+        `"L:62", "src/users/repositories/users.repository.ts", The User already exists!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
+    try {
+
+      if (requestingUser.role !== 'admin') {
+        throw new ForbiddenException('The user is not allowed to access!');
+      }
+      console.log(requestingUser.id);
+
+      const user = await this.findOne(requestingUser.id);
 
       if (!user) {
         throw new NotFoundException('User is not found!');
@@ -86,6 +133,7 @@ export class UsersRepository extends Repository<User> {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
+        profileImagePath: user.profileImagePath,
         email: user.email,
         role: user.role,
       };
@@ -108,16 +156,38 @@ export class UsersRepository extends Repository<User> {
     }
   }
 
+  async getUserProfileImage(userId: string): Promise<string> {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+
+      this.logger.verbose(
+        `"L:93", "src/users/repositories/users.repository.ts", User profile image path found! Data: ${JSON.stringify(
+          user.profileImagePath,
+        )}`,
+      );
+
+      return user.profileImagePath;
+    } catch (err) {
+      this.logger.error(
+        `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
   async updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
     requestingUser: User,
   ): Promise<Object> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -171,12 +241,38 @@ export class UsersRepository extends Repository<User> {
     }
   }
 
+  async updateProfielUser(userId: string, profileUser: ProfileUserDto) {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+      const { firstName, lastName, profileImagePath } = profileUser;
+      const updatedUser = user;
+      if (firstName) {
+        updatedUser.firstName = firstName;
+      }
+      if (lastName) {
+        updatedUser.lastName = lastName;
+      }
+      if (profileImagePath) {
+        updatedUser.profileImagePath = profileImagePath;
+      }
+      this.save(updatedUser);
+    } catch (err) {
+      this.logger.error(
+        `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
   async deleteUser(userId: string, requestingUser: User): Promise<string> {
     try {
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -187,7 +283,7 @@ export class UsersRepository extends Repository<User> {
       }
 
       this.logger.log(
-        `"L:189", "src/users/repositories/users.repository.ts", The task with ID ${JSON.stringify(
+        `"deleteUser", "src/users/repositories/users.repository.ts", The task with ID ${JSON.stringify(
           userId,
         )} is deleted!`,
       );
@@ -195,7 +291,7 @@ export class UsersRepository extends Repository<User> {
       return `The task with ID ${userId} is deleted!`;
     } catch (err) {
       this.logger.error(
-        `"L:197", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+        `"deleteUser", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
           userId,
         )} is not found!`,
         err.stack,
@@ -213,13 +309,7 @@ export class UsersRepository extends Repository<User> {
       skip = skip ? skip : 0;
       limit = limit ? limit : 2;
 
-      // console.log(typeof skip);
-      // console.log(typeof limit);
-
-      // console.log(`The requested User is ${JSON.stringify(requestingUser)}`);
-
       if (requestingUser.role !== 'admin') {
-        // console.log(`The requested user role is ${requestingUser.role}`);
         throw new ForbiddenException('The user is not allowed to access!');
       }
 
@@ -230,13 +320,13 @@ export class UsersRepository extends Repository<User> {
 
       if (usersList.length === 0) {
         this.logger.log(
-          `"L:232", "src/users/repositories/users.repository.ts", No data to show!`,
+          `"getUsers", "src/users/repositories/users.repository.ts", No data to show!`,
         );
         return 'There are no users to show!';
       }
 
       this.logger.verbose(
-        `"L:238", "src/users/repositories/users.repository.ts", User's list is loaded! Data: ${JSON.stringify(
+        `"getUsers", "src/users/repositories/users.repository.ts", User's list is loaded! Data: ${JSON.stringify(
           usersList,
         )}`,
       );

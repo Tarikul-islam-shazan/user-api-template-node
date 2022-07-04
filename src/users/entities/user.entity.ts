@@ -14,11 +14,14 @@ export class User {
   lastName: string;
 
   @Column()
+  profileImagePath: string;
+
+  @Column()
   email: string;
 
   @Column()
   password: string;
 
-  @Column()
+  @Column({ type: 'enum', enum: RoleBase, default: RoleBase.user})
   role: RoleBase;
 }
