@@ -6,6 +6,7 @@ import {
   Length,
   IsEnum,
   Matches,
+  IsOptional,
 } from 'class-validator';
 import { RoleBase } from '../enums/user-role.enum';
 
@@ -30,13 +31,20 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty()
+  @IsOptional()
+  @IsNotEmpty()
+  @Length(5, 255)
+  @IsString()
+  profileImagePath?: string;
+
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @Length(8, 32)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'Password is too weak!',
   })
-  password: string;
+  password?: string;
 
   @ApiProperty()
   @IsString()

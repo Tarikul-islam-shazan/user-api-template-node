@@ -211,3 +211,21 @@ To run the container instance:
 To stop the container instance
 
     docker stop nestjs_api_dev
+
+## List of feature check mark for Done. uncheck for Not done
+- [x] Multipole DB integration
+- [x] CRUD operation
+- [x] Authentication (token based, Facebook, Google)
+- [x] Authorization
+- [x] Docker
+- [x] User profile 
+- [x] ACL implementation 
+- [x] Forgot & Reset Password
+- [x] Email sending capability 
+- [x] Swagger documentation
+- [x] Postman test ready
+- [x] Unit test implementation 
+- [ ] Integrarion test
+- [ ] CI/CD 
+
+
