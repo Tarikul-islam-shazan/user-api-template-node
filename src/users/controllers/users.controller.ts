@@ -12,7 +12,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-
 import { GetUser } from '../decorators/get-user.decorator';
 import { User } from '../entities/user.entity';
 import { JwtGuard } from '../guards/jwt.guard';

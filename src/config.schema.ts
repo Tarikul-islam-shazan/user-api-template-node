@@ -9,4 +9,6 @@ export const configValidationSchema = Joi.object({
   APP_PORT: Joi.string().required(),
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
+  APP_ID: Joi.string().required(),
+  APP_SECRET: Joi.string().required(),
 });
