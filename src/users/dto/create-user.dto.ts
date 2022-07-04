@@ -6,6 +6,7 @@ import {
   Length,
   IsEnum,
   Matches,
+  IsOptional,
 } from 'class-validator';
 import { RoleBase } from '../enums/user-role.enum';
 
@@ -28,6 +29,13 @@ export class CreateUserDto {
   @Length(5, 255)
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNotEmpty()
+  @Length(5, 255)
+  @IsString()
+  profileImagePath?: string;
 
   @ApiProperty()
   @IsNotEmpty()
