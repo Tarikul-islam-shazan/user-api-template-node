@@ -16,6 +16,7 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { ProfileUserDto } from '../dto/profile-user.dto';
 import { ResetPasswordDto } from './../dto/reset-password.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { sendMail } from "../../utils/mail.handler";
@@ -74,6 +75,10 @@ export class UsersService {
     return this.usersRepository.getSingleUser(userId, requestingUser);
   }
 
+  getUserProfileImage(userId: string): Promise<string> {
+    return this.usersRepository.getUserProfileImage(userId);
+  }
+
   updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
@@ -84,6 +89,13 @@ export class UsersService {
       updateUserDto,
       requestingUser,
     );
+  }
+
+  updateUserProfile(
+    userId: string,
+    profileUserDto: ProfileUserDto,
+  ): Promise<any> {
+    return this.usersRepository.updateProfielUser(userId, profileUserDto);
   }
 
   deleteUser(userId: string, requestingUser: User): Promise<string> {

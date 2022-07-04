@@ -8,6 +8,7 @@ import { UsersController } from './controllers/users.controller';
 import { UsersRepository } from './repositories/users.repository';
 import { UsersService } from './services/users.service';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { MulterModule } from '@nestjs/platform-express';
 import { GoogleController } from './controllers/google.controller';
 import { GoogleStrategy } from './guards/google.strategy';
 import { FacebookStrategy } from './guards/facebook.strategy';
@@ -27,6 +28,13 @@ import { FacebookController } from './controllers/facebook.controller';
       }),
     }),
     TypeOrmModule.forFeature([UsersRepository]),
+    MulterModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        dest: configService.get('FILE_PATH'),
+      }),
+    }),
   ],
   controllers: [UsersController, GoogleController, FacebookController],
   providers: [UsersService, JwtStrategy, GoogleStrategy, ConfigService, FacebookStrategy],
