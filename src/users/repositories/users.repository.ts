@@ -12,6 +12,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { ProfileUserDto } from '../dto/profile-user.dto';
+import { UserModel } from '../models/user.model';
 import { sendMail } from "../../utils/mail.handler";
 
 @EntityRepository(User)
@@ -69,14 +71,59 @@ export class UsersRepository extends Repository<User> {
     }
   }
 
+  async createFacebookUser(createUserDto: CreateUserDto): Promise<UserModel> {
+    try {
+      const { firstName, lastName, email, role } = createUserDto;
+
+      const newUser = this.create({
+        firstName,
+        lastName,
+        email,
+        role,
+      });
+
+      const ifUserExists = await this.findOne({
+        email: newUser.email,
+      });
+
+      if (ifUserExists) {
+        return ifUserExists;
+      }
+
+      await this.save(newUser);
+
+      const newValidUser = {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+      };
+
+      this.logger.verbose(
+        `"L:54", "src/users/repositories/users.repository.ts", A new user is created! Data: ${JSON.stringify(
+          newValidUser,
+        )}`,
+      );
+      return newValidUser;
+    } catch (err) {
+      this.logger.error(
+        `"L:62", "src/users/repositories/users.repository.ts", The User already exists!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
   async getSingleUser(userId: string, requestingUser: User): Promise<Object> {
     try {
 
       if (requestingUser.role !== 'admin') {
         throw new ForbiddenException('The user is not allowed to access!');
       }
+      console.log(requestingUser.id);
 
-      const user = await this.findOne(userId);
+      const user = await this.findOne(requestingUser.id);
 
       if (!user) {
         throw new NotFoundException('User is not found!');
@@ -86,6 +133,7 @@ export class UsersRepository extends Repository<User> {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
+        profileImagePath: user.profileImagePath,
         email: user.email,
         role: user.role,
       };
@@ -97,6 +145,31 @@ export class UsersRepository extends Repository<User> {
       );
 
       return userInfo;
+    } catch (err) {
+      this.logger.error(
+        `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getUserProfileImage(userId: string): Promise<string> {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+
+      this.logger.verbose(
+        `"L:93", "src/users/repositories/users.repository.ts", User profile image path found! Data: ${JSON.stringify(
+          user.profileImagePath,
+        )}`,
+      );
+
+      return user.profileImagePath;
     } catch (err) {
       this.logger.error(
         `"L:101", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
@@ -157,6 +230,35 @@ export class UsersRepository extends Repository<User> {
       );
 
       return updatedUserInfo;
+    } catch (err) {
+      this.logger.error(
+        `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(
+          userId,
+        )} is not found!`,
+        err.stack,
+      );
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async updateProfielUser(userId: string, profileUser: ProfileUserDto) {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User is not found!');
+      }
+      const { firstName, lastName, profileImagePath } = profileUser;
+      const updatedUser = user;
+      if (firstName) {
+        updatedUser.firstName = firstName;
+      }
+      if (lastName) {
+        updatedUser.lastName = lastName;
+      }
+      if (profileImagePath) {
+        updatedUser.profileImagePath = profileImagePath;
+      }
+      this.save(updatedUser);
     } catch (err) {
       this.logger.error(
         `"L:164", "src/users/repositories/users.repository.ts", The user with ID ${JSON.stringify(

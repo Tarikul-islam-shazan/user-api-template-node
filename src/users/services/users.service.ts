@@ -16,6 +16,7 @@ import { UpdateUserDto } from './../dto/update-user.dto';
 import { UsersRepository } from '../repositories/users.repository';
 import { User } from './../entities/user.entity';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { ProfileUserDto } from '../dto/profile-user.dto';
 import { ResetPasswordDto } from './../dto/reset-password.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { sendMail } from "../../utils/mail.handler";
@@ -36,6 +37,32 @@ export class UsersService {
     return this.usersRepository.createUser(createUserDto);
   }
 
+  async createFacebookUser(
+    createUserDto: CreateUserDto,
+  ): Promise<{ accessToken }> {
+    const fbUser = await this.usersRepository.createFacebookUser(createUserDto);
+    const { email, id, role } = fbUser;
+
+    const isEmailValid = await this.usersRepository.findOne({ email });
+    if (!isEmailValid) {
+      throw new UnauthorizedException('Invalid email or password!');
+    }
+
+    const payLoad: JwtPayload = {
+      id: id,
+      role: role,
+    };
+    const accessToken = await this.jwtService.sign(payLoad);
+
+    this.logger.verbose(
+      `"L:84", "src/users/services/users.service.ts", Logged in successfully! Token: ${JSON.stringify(
+        accessToken,
+      )}`,
+    );
+
+    return { accessToken };
+  }
+
   async getUsers(
     skip: number,
     limit: number,
@@ -48,6 +75,10 @@ export class UsersService {
     return this.usersRepository.getSingleUser(userId, requestingUser);
   }
 
+  getUserProfileImage(userId: string): Promise<string> {
+    return this.usersRepository.getUserProfileImage(userId);
+  }
+
   updateUser(
     userId: string,
     updateUserDto: UpdateUserDto,
@@ -58,6 +89,13 @@ export class UsersService {
       updateUserDto,
       requestingUser,
     );
+  }
+
+  updateUserProfile(
+    userId: string,
+    profileUserDto: ProfileUserDto,
+  ): Promise<any> {
+    return this.usersRepository.updateProfielUser(userId, profileUserDto);
   }
 
   deleteUser(userId: string, requestingUser: User): Promise<string> {

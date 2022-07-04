@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
 import { Logger, ValidationPipe } from '@nestjs/common';
