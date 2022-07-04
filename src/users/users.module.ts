@@ -13,6 +13,7 @@ import { GoogleController } from './controllers/google.controller';
 import { GoogleStrategy } from './guards/google.strategy';
 import { FacebookStrategy } from './guards/facebook.strategy';
 import { FacebookController } from './controllers/facebook.controller';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -36,7 +37,9 @@ import { FacebookController } from './controllers/facebook.controller';
       }),
     }),
   ],
+
   controllers: [UsersController, GoogleController, FacebookController],
-  providers: [UsersService, JwtStrategy, GoogleStrategy, ConfigService, FacebookStrategy],
+  providers: [UsersService, JwtStrategy, GoogleStrategy, ConfigService, FacebookStrategy, ConfigService, RolesGuard],
+
 })
 export class UsersModule {}

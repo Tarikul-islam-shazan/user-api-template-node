@@ -31,6 +31,9 @@ import { LoginUserDto } from './../dto/login-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
 import { ResetPasswordDto } from "../dto/reset-password.dto";
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { Roles } from '../decorators/roles.decorator';
+import { RoleBase } from '../enums/user-role.enum';
+import { RolesGuard } from '../guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
@@ -95,6 +98,14 @@ export class UsersController {
     return this.usersService.dashboard(userInfo);
   }
 
+  @Post('acl-test')
+  @ApiBearerAuth()
+  @Roles(RoleBase.admin)
+  @UseGuards(JwtGuard,RolesGuard)
+  aclTest(@Body() cre) {
+    return 'acl okay';
+  }
+
   @Post('upload')
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
@@ -149,4 +160,5 @@ export class UsersController {
     @Body() resetPasswordObj: ResetPasswordDto){
     return this.usersService.resetPassword(userId,token,resetPasswordObj);
   }
+
 }
