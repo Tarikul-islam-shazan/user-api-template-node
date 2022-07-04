@@ -1,3 +1,5 @@
+# Quickstart-Node
+This is a skeleton to start quickly a backend project with Node.js  and MongoDB
 
 <p  align="center">
 <a  href="http://nestjs.com/"  target="blank"><img  src="https://nestjs.com/img/logo_text.svg"  width="320"  alt="Nest Logo" /></a>
@@ -209,3 +211,21 @@ To run the container instance:
 To stop the container instance
 
     docker stop nestjs_api_dev
+
+## List of feature check mark for Done. uncheck for Not done
+- [x] Multipole DB integration
+- [x] CRUD operation
+- [x] Authentication (token based, Facebook, Google)
+- [x] Authorization
+- [x] Docker
+- [x] User profile 
+- [x] ACL implementation 
+- [x] Forgot & Reset Password
+- [x] Email sending capability 
+- [x] Swagger documentation
+- [x] Postman test ready
+- [x] Unit test implementation 
+- [ ] Integrarion test
+- [ ] CI/CD 
+
+

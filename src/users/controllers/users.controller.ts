@@ -29,6 +29,8 @@ import { editFileName, imageFileFilter } from '../utils/file-upload.utils';
 import { CreateUserDto } from './../dto/create-user.dto';
 import { LoginUserDto } from './../dto/login-user.dto';
 import { UpdateUserDto } from './../dto/update-user.dto';
+import { ResetPasswordDto } from "../dto/reset-password.dto";
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -125,5 +127,26 @@ export class UsersController {
   async seeUploadedFile(@Param('id') userId: string, @Res() res) {
     const profileImage = await this.usersService.getUserProfileImage(userId);
     return res.sendFile(profileImage, { root: './files/avatar' });
+  }
+  
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordObj: ForgotPasswordDto){
+    return this.usersService.forgotPassword(forgotPasswordObj);
+  }
+
+  @Get('reset-password/:id/:token')
+  resetPasswordForGet(
+    @Param('id') userId: string,
+    @Param('token') token: string){
+    
+    return this.usersService.resetPasswordGetRequest(userId,token);
+  }
+
+  @Post('reset-password/:id/:token')
+  resetPassword(
+    @Param('id') userId: string,
+    @Param('token') token: string,
+    @Body() resetPasswordObj: ResetPasswordDto){
+    return this.usersService.resetPassword(userId,token,resetPasswordObj);
   }
 }
