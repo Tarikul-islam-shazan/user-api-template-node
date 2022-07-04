@@ -7,7 +7,7 @@
 /dist
 /node_modules
 
-#files
+#file upload
 /files
 
 # Logs
